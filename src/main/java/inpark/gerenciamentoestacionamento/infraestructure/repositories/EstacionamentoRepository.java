@@ -1,0 +1,11 @@
+package inpark.gerenciamentoestacionamento.infraestructure.repositories;
+
+import inpark.gerenciamentoestacionamento.model.entities.Estacionamento;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
+
+public interface EstacionamentoRepository extends JpaRepository<Estacionamento, Long> {
+    List<Estacionamento> findByStatusTrue();
+    List<Estacionamento> findByDono_Id(Long donoId);
+}
