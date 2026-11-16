@@ -1,0 +1,26 @@
+package inpark.gerenciamentoestacionamento.model.entities.usuarios;
+
+import inpark.gerenciamentoestacionamento.model.entities.Estacionamento;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
+
+@Entity
+@NoArgsConstructor
+@AllArgsConstructor
+@Setter
+@Getter
+@SuperBuilder
+@PrimaryKeyJoinColumn(name = "id")
+public class Gerente extends Usuario {
+
+    @Column(name = "cpf_ou_cnpj", nullable = false, unique = true)
+    private String cpfOuCnpj;
+
+    @ManyToOne
+    @JoinColumn(name = "estacionamento_id")
+    private Estacionamento estacionamento;
+}
