@@ -1,0 +1,112 @@
+package inpark.gerenciamentoestacionamento.application.dto.response;
+
+import inpark.gerenciamentoestacionamento.application.dto.response.usuario.GerenteResponse;
+import io.swagger.v3.oas.annotations.media.Schema;
+
+import java.time.LocalTime;
+import java.util.List;
+
+public record EstacionamentoResponse(
+        Long id,
+        @Schema(
+                name = "nome",
+                description = "Nome do estacionamento.",
+                examples = "Estacionamento Central"
+        )
+        String nome,
+        @Schema(
+                name = "endereco",
+                description = "Endereço do estacionamento.",
+                examples = "Rua das Flores"
+        )
+        String endereco,
+        @Schema(
+                name = "CEP",
+                description = "CEP do estacionamento.",
+                examples = "12345-678"
+        )
+        String CEP,
+        @Schema(
+                name = "numero",
+                description = "Número do estacionamento.",
+                examples = "123"
+        )
+        String numero,
+        @Schema(
+                name = "foto",
+                description = "Foto do estacionamento.",
+                examples = "foto.jpg"
+        )
+        String foto,
+        @Schema(
+                name = "numeroAlvaraDeFuncionamento",
+                description = "Número do alvará de funcionamento do estacionamento.",
+                examples = "123456789"
+        )
+        String numeroAlvaraDeFuncionamento,
+        @Schema(
+                name = "horaFechamento",
+                description = "Hora de fechamento do estacionamento.",
+                type = "string",
+                pattern = "HH:mm:ss",
+                examples = "22:00:00"
+        )
+        LocalTime horaFechamento,
+        @Schema(
+                name = "horaAbertura",
+                description = "Hora de abertura do estacionamento.",
+                type = "string",
+                pattern = "HH:mm:ss",
+                examples = "08:00:00"
+        )
+        LocalTime horaAbertura,
+        @Schema(
+                name = "vagasPreferenciais",
+                description = "Número de vagas preferenciais do estacionamento.",
+                examples = "10"
+        )
+        Integer vagasPreferenciais,
+        @Schema(
+                name = "maximoDeVagas",
+                description = "Número máximo de vagas do estacionamento.",
+                examples = "100"
+        )
+        Integer maximoDeVagas,
+        @Schema(
+                name = "numeroDeEscrituraImovel",
+                description = "Número de escritura do imóvel do estacionamento.",
+                examples = "987654321"
+        )
+        String numeroDeEscrituraImovel,
+        @Schema(
+                name = "status",
+                description = "Status da entidade, se está ativa ou inativa no sistema",
+                examples = "true"
+        )
+        Boolean status,
+        @Schema(
+                name = "avaliacoes",
+                description = "Armazena todas as avaliações feitas a este estacionamento",
+                examples = ""
+        )
+        List<AvaliacaoResponse> avaliacoes,
+        @Schema(
+                name = "acessos",
+                description = "Armazena todos os acessos feitos neste estacionamento",
+                examples = ""
+        )
+        List<AcessoResponse> acessos,
+        @Schema(
+                name = "reservas",
+                description = "Armazena todas as reservas feitas neste estacionamento",
+                examples = ""
+        )
+        List<ReservaResponseResumo> reservas,
+        @Schema(
+                name = "gerentes",
+                description = "Armazena todos os gerentes responsaveis por este estacionamento",
+                examples = ""
+        )
+        List<GerenteResponse> gerentes
+) {
+}
