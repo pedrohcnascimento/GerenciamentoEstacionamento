@@ -1,0 +1,71 @@
+package inpark.gerenciamentoestacionamento.infraestructure_ui.controller;
+
+import inpark.gerenciamentoestacionamento.application.dto.requests.ValorRequest;
+import inpark.gerenciamentoestacionamento.application.dto.response.ValorResponse;
+import inpark.gerenciamentoestacionamento.application.services.ValorService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/valor")
+@Tag(
+        name = "Valor controller",
+        description = "Realiza operações referentes à valores de estacionamento"
+)
+public class ValorController {
+    private final ValorService service;
+
+    public ValorController(ValorService service) {
+        this.service = service;
+    }
+
+    @GetMapping
+    @Operation(
+            summary = "Listar valores",
+            description = "Lista todos os valores cadastrados no sistema"
+    )
+    public ResponseEntity<List<ValorResponse>> listarValor() {
+        return ResponseEntity.status(200).body(service.listarValor());
+    }
+
+    @GetMapping("/{id}")
+    @Operation(
+            summary = "Buscar por ID",
+            description = "Busca uma entidade em especifico através de ID"
+    )
+    public ResponseEntity<ValorResponse> buscarPorId(@PathVariable Long id) {
+        return ResponseEntity.status(200).body(service.buscarPorId(id));
+    }
+
+    @PostMapping
+    @Operation(
+            summary = "Cadastrar valor",
+            description = "Cadastra um novo valor no sistema"
+    )
+    public ResponseEntity<ValorResponse> cadastrarValor(@RequestBody ValorRequest dto) {
+        return ResponseEntity.status(201).body(service.cadastrarValor(dto));
+    }
+
+    @PutMapping("/{id}")
+    @Operation(
+            summary = "Atualizar valor",
+            description = "Atualiza um valor cadastrado no sistema"
+    )
+    public ResponseEntity<ValorResponse> atualizarValor(@RequestBody ValorRequest dto, @PathVariable Long id) {
+        return ResponseEntity.status(200).body(service.atualizarValor(dto, id));
+    }
+
+    @DeleteMapping("/{id}")
+    @Operation(
+            summary = "Deletar valor",
+            description = "Deleta um valor cadastrado no sistema"
+    )
+    public ResponseEntity<Void> deletarValor(@PathVariable Long id) {
+        service.deletarValor(id);
+        return ResponseEntity.status(204).build();
+    }
+}
