@@ -17,8 +17,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/reserva")
 @Tag(
-        name = "Reserva Controller",
-        description = "Realiza operações referentes a criação de reservas"
+        name = "8. Reservas",
+        description = "CRUD direto de reservas de vagas em estacionamentos"
 )
 public class ReservaController {
     private final ReservaService service;

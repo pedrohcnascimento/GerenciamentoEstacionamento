@@ -17,8 +17,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/carro")
 @Tag(
-        name = "Carro controller",
-        description = "Realiza operações referentes aos carros"
+        name = "6. Carros",
+        description = "CRUD direto de veículos (requer perfil CLIENTE ou ADMIN)"
 )
 public class CarroController {
     private final CarroService service;

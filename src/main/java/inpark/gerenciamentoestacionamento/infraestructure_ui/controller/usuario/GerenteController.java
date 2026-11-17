@@ -17,8 +17,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/gerente")
 @Tag(
-        name = "Gerente controller",
-        description = "Realiza operações relacionadas aos gerentes de estacionamento"
+        name = "4. Gerentes",
+        description = "CRUD de gerentes vinculados a estacionamentos (requer perfil DONO ou ADMIN)"
 )
 public class GerenteController {
     private final GerenteService service;

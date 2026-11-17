@@ -7,7 +7,9 @@ import inpark.gerenciamentoestacionamento.application.dto.response.usuario.DonoR
 import inpark.gerenciamentoestacionamento.application.services.EstacionamentoService;
 import inpark.gerenciamentoestacionamento.application.services.usuario.DonoService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -20,8 +22,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/dono")
 @Tag(
-        name = "Dono de estacionamento controller",
-        description = "Realiza operações referentes ao CRUD da entidade Dono de estacionamento, eixo central do projeto necessario para a maioria das operações"
+        name = "3. Donos de Estacionamento",
+        description = "CRUD de proprietários de estacionamento e rota aninhada 1:N (estacionamentos do proprietário)"
 )
 public class DonoController {
     private final DonoService service;
@@ -59,10 +61,10 @@ public class DonoController {
     }
 
     @PostMapping
+    @SecurityRequirements
     @Operation(
-            method = "POST",
             summary = "Cadastrar dono",
-            description = "Cadastra um novo dono no sistema, inicialmente apenas com informações genéricas de usuario.",
+            description = "Acesso público. Cadastra um novo proprietário de estacionamento no sistema.",
             responses = {
                     @ApiResponse(responseCode = "201", description = "Dono cadastrado com sucesso"),
                     @ApiResponse(responseCode = "400", description = "Requisição inválida"),
@@ -112,28 +114,28 @@ public class DonoController {
     @GetMapping("/{id}/estacionamentos")
     @Operation(
             summary = "Listar estacionamentos do proprietário (1:N)",
-            description = "Lista todos os estacionamentos ativos pertencentes ao proprietário informado.",
+            description = "Requer perfil DONO ou ADMIN. Lista todos os estacionamentos ativos pertencentes ao proprietário informado.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Lista de estacionamentos retornada com sucesso"),
                     @ApiResponse(responseCode = "404", description = "Proprietário não encontrado")
             }
     )
-    public ResponseEntity<List<EstacionamentoResponse>> listarEstacionamentosDoDono(@PathVariable Long id) {
+    public ResponseEntity<List<EstacionamentoResponse>> listarEstacionamentosDoDono(@Parameter(description = "ID do dono de estacionamento") @PathVariable Long id) {
         return ResponseEntity.ok(estacionamentoService.listarPorDono(id));
     }
 
     @PostMapping("/{id}/estacionamentos")
     @Operation(
             summary = "Cadastrar estacionamento para o proprietário (1:N)",
-            description = "Cadastra um novo estacionamento vinculado ao proprietário informado.",
+            description = "Requer perfil DONO ou ADMIN. Cadastra um novo estacionamento vinculado automaticamente ao proprietário informado na URL.",
             responses = {
                     @ApiResponse(responseCode = "201", description = "Estacionamento cadastrado com sucesso"),
-                    @ApiResponse(responseCode = "400", description = "Requisição inválida"),
+                    @ApiResponse(responseCode = "400", description = "Dados inválidos (Bean Validation)"),
                     @ApiResponse(responseCode = "404", description = "Proprietário não encontrado"),
-                    @ApiResponse(responseCode = "409", description = "Conflito de dados (alvará duplicado)")
+                    @ApiResponse(responseCode = "409", description = "Conflito de dados (alvará ou escritura já cadastrados)")
             }
     )
-    public ResponseEntity<EstacionamentoResponse> cadastrarEstacionamentoDoDono(@PathVariable Long id, @RequestBody @Valid EstacionamentoRequest dto) {
+    public ResponseEntity<EstacionamentoResponse> cadastrarEstacionamentoDoDono(@Parameter(description = "ID do dono de estacionamento") @PathVariable Long id, @RequestBody @Valid EstacionamentoRequest dto) {
         EstacionamentoResponse criado = estacionamentoService.cadastrarEstacionamento(dto, id);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{estacionamentoId}")

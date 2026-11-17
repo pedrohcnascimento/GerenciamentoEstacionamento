@@ -16,10 +16,12 @@ import inpark.gerenciamentoestacionamento.application.services.EstacionamentoSer
 import inpark.gerenciamentoestacionamento.application.services.ReservaService;
 import inpark.gerenciamentoestacionamento.application.services.ValorService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -33,8 +35,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/estacionamento")
 @Tag(
-        name = "Estacionamento controller",
-        description = "Realiza operações referentes aos estacionamentos e suas rotas aninhadas 1:N"
+        name = "5. Estacionamentos",
+        description = "CRUD de estacionamentos e rotas aninhadas 1:N (reservas, tarifas, acessos e avaliações)"
 )
 public class EstacionamentoController {
     private final EstacionamentoService service;
@@ -56,10 +58,10 @@ public class EstacionamentoController {
     }
 
     @GetMapping
+    @SecurityRequirements
     @Operation(
-            method = "GET",
             summary = "Listar todos os estacionamentos",
-            description = "Retorna uma lista de todos os estacionamentos ativos cadastrados no sistema.",
+            description = "Acesso público. Retorna todos os estacionamentos ativos cadastrados no sistema.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Lista de estacionamentos retornada com sucesso")
             }
@@ -69,24 +71,24 @@ public class EstacionamentoController {
     }
 
     @GetMapping("/{id}")
+    @SecurityRequirements
     @Operation(
-            summary = "Buscar por ID",
-            description = "Busca um estacionamento em específico através do ID",
+            summary = "Buscar estacionamento por ID",
+            description = "Acesso público. Busca um estacionamento específico através do seu ID.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Estacionamento encontrado com sucesso"),
                     @ApiResponse(responseCode = "404", description = "Estacionamento não encontrado")
             }
     )
-    public ResponseEntity<EstacionamentoResponse> buscarPorId(@PathVariable Long id) {
+    public ResponseEntity<EstacionamentoResponse> buscarPorId(@Parameter(description = "ID do estacionamento") @PathVariable Long id) {
         return ResponseEntity.status(200).body(service.buscarPorId(id));
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'DONO')")
     @PostMapping("/{id}")
     @Operation(
-            method = "POST",
-            summary = "Cadastrar um novo estacionamento",
-            description = "Cadastra um novo estacionamento no sistema com base nos dados fornecidos.",
+            summary = "Cadastrar estacionamento para um dono",
+            description = "Requer perfil DONO ou ADMIN. Cadastra um novo estacionamento vinculado ao dono informado no parâmetro {id} (equivale a POST /dono/{id}/estacionamentos).",
             responses = {
                     @ApiResponse(responseCode = "201", description = "Estacionamento cadastrado com sucesso"),
                     @ApiResponse(responseCode = "400", description = "Requisição inválida"),
@@ -117,7 +119,7 @@ public class EstacionamentoController {
                     )
             )
     )
-    public ResponseEntity<EstacionamentoResponse> cadastrarEstacionamento(@RequestBody @Valid EstacionamentoRequest dto, @PathVariable Long id) {
+    public ResponseEntity<EstacionamentoResponse> cadastrarEstacionamento(@RequestBody @Valid EstacionamentoRequest dto, @Parameter(description = "ID do dono do estacionamento") @PathVariable Long id) {
         EstacionamentoResponse criado = service.cadastrarEstacionamento(dto, id);
         URI location = ServletUriComponentsBuilder.fromCurrentContextPath()
                 .path("/estacionamento/{estId}")
@@ -160,22 +162,31 @@ public class EstacionamentoController {
     // ==================== ROTAS ANINHADAS 1:N ====================
 
     @GetMapping("/{id}/reservas")
-    @Operation(summary = "Listar reservas do estacionamento (1:N)", responses = {
-            @ApiResponse(responseCode = "200", description = "Lista de reservas retornada com sucesso"),
-            @ApiResponse(responseCode = "404", description = "Estacionamento não encontrado")
-    })
-    public ResponseEntity<List<ReservaResponse>> listarReservasDoEstacionamento(@PathVariable Long id) {
+    @SecurityRequirements
+    @Operation(
+            summary = "Listar reservas do estacionamento (1:N)",
+            description = "Acesso público. Lista todas as reservas ativas vinculadas ao estacionamento informado.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Lista de reservas retornada com sucesso"),
+                    @ApiResponse(responseCode = "404", description = "Estacionamento não encontrado")
+            }
+    )
+    public ResponseEntity<List<ReservaResponse>> listarReservasDoEstacionamento(@Parameter(description = "ID do estacionamento") @PathVariable Long id) {
         return ResponseEntity.ok(reservaService.listarPorEstacionamento(id));
     }
 
     @PostMapping("/{id}/reservas")
-    @Operation(summary = "Cadastrar reserva no estacionamento (1:N)", responses = {
-            @ApiResponse(responseCode = "201", description = "Reserva cadastrada com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Requisição inválida"),
-            @ApiResponse(responseCode = "404", description = "Estacionamento ou cliente não encontrado"),
-            @ApiResponse(responseCode = "409", description = "Sem vagas disponíveis para o período")
-    })
-    public ResponseEntity<ReservaResponse> cadastrarReservaNoEstacionamento(@PathVariable Long id, @RequestBody @Valid ReservaRequest dto) {
+    @Operation(
+            summary = "Cadastrar reserva no estacionamento (1:N)",
+            description = "Requer perfil CLIENTE, DONO, GERENTE ou ADMIN. Cria uma reserva vinculada ao estacionamento informado na URL (retorna 409 se não houver vagas).",
+            responses = {
+                    @ApiResponse(responseCode = "201", description = "Reserva cadastrada com sucesso"),
+                    @ApiResponse(responseCode = "400", description = "Dados inválidos (Bean Validation)"),
+                    @ApiResponse(responseCode = "404", description = "Estacionamento ou cliente não encontrado"),
+                    @ApiResponse(responseCode = "409", description = "Sem vagas disponíveis para o período")
+            }
+    )
+    public ResponseEntity<ReservaResponse> cadastrarReservaNoEstacionamento(@Parameter(description = "ID do estacionamento") @PathVariable Long id, @RequestBody @Valid ReservaRequest dto) {
         ReservaRequest req = new ReservaRequest(dto.clienteId(), id, dto.dataDaReserva(), dto.horaDaReserva(), dto.statusReserva());
         ReservaResponse criado = reservaService.cadastrarReserva(req);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
@@ -186,21 +197,30 @@ public class EstacionamentoController {
     }
 
     @GetMapping("/{id}/valores")
-    @Operation(summary = "Listar tarifas do estacionamento (1:N)", responses = {
-            @ApiResponse(responseCode = "200", description = "Lista de tarifas retornada com sucesso"),
-            @ApiResponse(responseCode = "404", description = "Estacionamento não encontrado")
-    })
-    public ResponseEntity<List<ValorResponse>> listarValoresDoEstacionamento(@PathVariable Long id) {
+    @SecurityRequirements
+    @Operation(
+            summary = "Listar tarifas do estacionamento (1:N)",
+            description = "Acesso público. Lista todas as tabelas de preços e tarifas ativas do estacionamento informado.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Lista de tarifas retornada com sucesso"),
+                    @ApiResponse(responseCode = "404", description = "Estacionamento não encontrado")
+            }
+    )
+    public ResponseEntity<List<ValorResponse>> listarValoresDoEstacionamento(@Parameter(description = "ID do estacionamento") @PathVariable Long id) {
         return ResponseEntity.ok(valorService.listarPorEstacionamento(id));
     }
 
     @PostMapping("/{id}/valores")
-    @Operation(summary = "Cadastrar tarifa no estacionamento (1:N)", responses = {
-            @ApiResponse(responseCode = "201", description = "Tarifa cadastrada com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Requisição inválida"),
-            @ApiResponse(responseCode = "404", description = "Estacionamento não encontrado")
-    })
-    public ResponseEntity<ValorResponse> cadastrarValorNoEstacionamento(@PathVariable Long id, @RequestBody @Valid ValorRequest dto) {
+    @Operation(
+            summary = "Cadastrar tarifa no estacionamento (1:N)",
+            description = "Requer perfil DONO ou ADMIN. Cadastra uma nova tarifa vinculada ao estacionamento informado na URL.",
+            responses = {
+                    @ApiResponse(responseCode = "201", description = "Tarifa cadastrada com sucesso"),
+                    @ApiResponse(responseCode = "400", description = "Dados inválidos (Bean Validation)"),
+                    @ApiResponse(responseCode = "404", description = "Estacionamento não encontrado")
+            }
+    )
+    public ResponseEntity<ValorResponse> cadastrarValorNoEstacionamento(@Parameter(description = "ID do estacionamento") @PathVariable Long id, @RequestBody @Valid ValorRequest dto) {
         ValorRequest req = new ValorRequest(dto.tipoDeCobranca(), dto.tipoDePagamento(), dto.preco(), dto.periodo(), id);
         ValorResponse criado = valorService.cadastrarValor(req);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
@@ -211,21 +231,30 @@ public class EstacionamentoController {
     }
 
     @GetMapping("/{id}/acessos")
-    @Operation(summary = "Listar acessos do estacionamento (1:N)", responses = {
-            @ApiResponse(responseCode = "200", description = "Lista de acessos retornada com sucesso"),
-            @ApiResponse(responseCode = "404", description = "Estacionamento não encontrado")
-    })
-    public ResponseEntity<List<AcessoResponse>> listarAcessosDoEstacionamento(@PathVariable Long id) {
+    @SecurityRequirements
+    @Operation(
+            summary = "Listar acessos do estacionamento (1:N)",
+            description = "Acesso público. Lista todos os registros de entrada e saída de veículos do estacionamento informado.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Lista de acessos retornada com sucesso"),
+                    @ApiResponse(responseCode = "404", description = "Estacionamento não encontrado")
+            }
+    )
+    public ResponseEntity<List<AcessoResponse>> listarAcessosDoEstacionamento(@Parameter(description = "ID do estacionamento") @PathVariable Long id) {
         return ResponseEntity.ok(acessoService.listarPorEstacionamento(id));
     }
 
     @PostMapping("/{id}/acessos")
-    @Operation(summary = "Registrar acesso no estacionamento (1:N)", responses = {
-            @ApiResponse(responseCode = "201", description = "Acesso registrado com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Requisição inválida"),
-            @ApiResponse(responseCode = "404", description = "Estacionamento não encontrado")
-    })
-    public ResponseEntity<AcessoResponse> cadastrarAcessoNoEstacionamento(@PathVariable Long id, @RequestBody @Valid AcessoRequest dto) {
+    @Operation(
+            summary = "Registrar acesso no estacionamento (1:N)",
+            description = "Requer perfil CLIENTE, DONO, GERENTE ou ADMIN. Registra a entrada/saída de um veículo no estacionamento informado na URL.",
+            responses = {
+                    @ApiResponse(responseCode = "201", description = "Acesso registrado com sucesso"),
+                    @ApiResponse(responseCode = "400", description = "Dados inválidos (Bean Validation)"),
+                    @ApiResponse(responseCode = "404", description = "Estacionamento não encontrado")
+            }
+    )
+    public ResponseEntity<AcessoResponse> cadastrarAcessoNoEstacionamento(@Parameter(description = "ID do estacionamento") @PathVariable Long id, @RequestBody @Valid AcessoRequest dto) {
         AcessoRequest req = new AcessoRequest(dto.carroId(), dto.placaDoCarro(), dto.horaDeEntrada(), dto.horaDeSaida(), dto.valorAPagar(), id);
         AcessoResponse criado = acessoService.cadastrarAcesso(req);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
@@ -236,21 +265,30 @@ public class EstacionamentoController {
     }
 
     @GetMapping("/{id}/avaliacoes")
-    @Operation(summary = "Listar avaliações do estacionamento (1:N)", responses = {
-            @ApiResponse(responseCode = "200", description = "Lista de avaliações retornada com sucesso"),
-            @ApiResponse(responseCode = "404", description = "Estacionamento não encontrado")
-    })
-    public ResponseEntity<List<AvaliacaoResponse>> listarAvaliacoesDoEstacionamento(@PathVariable Long id) {
+    @SecurityRequirements
+    @Operation(
+            summary = "Listar avaliações do estacionamento (1:N)",
+            description = "Acesso público. Lista todas as avaliações ativas recebidas pelo estacionamento informado.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Lista de avaliações retornada com sucesso"),
+                    @ApiResponse(responseCode = "404", description = "Estacionamento não encontrado")
+            }
+    )
+    public ResponseEntity<List<AvaliacaoResponse>> listarAvaliacoesDoEstacionamento(@Parameter(description = "ID do estacionamento") @PathVariable Long id) {
         return ResponseEntity.ok(avaliacaoService.listarPorEstacionamento(id));
     }
 
     @PostMapping("/{id}/avaliacoes")
-    @Operation(summary = "Cadastrar avaliação no estacionamento (1:N)", responses = {
-            @ApiResponse(responseCode = "201", description = "Avaliação cadastrada com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Avaliação inválida"),
-            @ApiResponse(responseCode = "404", description = "Estacionamento ou cliente não encontrado")
-    })
-    public ResponseEntity<AvaliacaoResponse> cadastrarAvaliacaoNoEstacionamento(@PathVariable Long id, @RequestBody @Valid AvaliacaoRequest dto) {
+    @Operation(
+            summary = "Cadastrar avaliação no estacionamento (1:N)",
+            description = "Requer perfil CLIENTE, DONO, GERENTE ou ADMIN. Registra uma avaliação para o estacionamento informado na URL.",
+            responses = {
+                    @ApiResponse(responseCode = "201", description = "Avaliação cadastrada com sucesso"),
+                    @ApiResponse(responseCode = "400", description = "Avaliação inválida"),
+                    @ApiResponse(responseCode = "404", description = "Estacionamento ou cliente não encontrado")
+            }
+    )
+    public ResponseEntity<AvaliacaoResponse> cadastrarAvaliacaoNoEstacionamento(@Parameter(description = "ID do estacionamento") @PathVariable Long id, @RequestBody @Valid AvaliacaoRequest dto) {
         AvaliacaoRequest req = new AvaliacaoRequest(dto.clienteId(), id, dto.nota(), dto.comentario(), dto.dataDeAvaliacao());
         AvaliacaoResponse criado = avaliacaoService.cadastrarAvaliacao(req);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()

@@ -20,8 +20,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/acesso")
 @Tag(
-        name = "Acesso controller",
-        description = "Realiza operações referente ao acesso dos carros aos estacionamentos"
+        name = "9. Acessos (Entrada e Saída)",
+        description = "CRUD direto de registros de entrada e saída de veículos nos estacionamentos"
 )
 public class AcessoController {
     private final AcessoService service;

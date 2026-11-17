@@ -18,6 +18,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -37,8 +38,8 @@ import java.util.Date;
 @RequestMapping("/auth")
 @RequiredArgsConstructor
 @Tag(
-        name = "Autenticação controller",
-        description = "Realiza operações de login, consulta de perfil autenticado e criação de usuário admin de teste"
+        name = "1. Autenticação",
+        description = "Login JWT, consulta do perfil autenticado e criação de usuário ADMIN para testes"
 )
 public class AuthController {
     private final AuthService authService;
@@ -48,10 +49,10 @@ public class AuthController {
     private final DonoDao DonoDao;
 
     @PostMapping("/login")
+    @SecurityRequirements
     @Operation(
-            method = "POST",
             summary = "Realizar login",
-            description = "Retorna um token JWT caso o login seja válido",
+            description = "Acesso público. Valida e-mail e senha e retorna um token JWT Bearer.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Login realizado com sucesso"),
                     @ApiResponse(responseCode = "401", description = "Credenciais inválidas")
@@ -80,9 +81,8 @@ public class AuthController {
 
     @PostMapping("/me")
     @Operation(
-            method = "POST",
             summary = "Consultar dados do usuário autenticado",
-            description = "Retorna os dados do usuário correspondente ao token JWT enviado",
+            description = "Requer token JWT válido. Retorna os dados do usuário correspondente ao token informado no botão Authorize.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Dados do usuário retornados com sucesso"),
                     @ApiResponse(responseCode = "401", description = "Token JWT ausente ou inválido")
@@ -121,10 +121,10 @@ public class AuthController {
     }
 
     @PostMapping("/criar-admin")
+    @SecurityRequirements
     @Operation(
-            method = "POST",
             summary = "Criar usuário ADMIN de teste",
-            description = "Cria o usuário admin@teste.com (senha 123456) para testes em ambiente de desenvolvimento",
+            description = "Acesso público (desenvolvimento). Cria o usuário admin@teste.com (senha 123456) com perfil ADMIN.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Admin criado ou já existente")
             }

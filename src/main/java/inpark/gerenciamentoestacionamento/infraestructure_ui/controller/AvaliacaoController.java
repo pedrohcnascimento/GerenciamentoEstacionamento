@@ -5,6 +5,7 @@ import inpark.gerenciamentoestacionamento.application.dto.response.AvaliacaoResp
 import inpark.gerenciamentoestacionamento.application.services.AvaliacaoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -17,8 +18,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/avaliacao")
 @Tag(
-        name = "Avaliação controller",
-        description = "Realiza operações referentes à avaliações de estacionamento"
+        name = "10. Avaliações",
+        description = "CRUD direto de avaliações de estacionamentos"
 )
 public class AvaliacaoController {
     private final AvaliacaoService service;
@@ -28,10 +29,10 @@ public class AvaliacaoController {
     }
 
     @GetMapping
+    @SecurityRequirements
     @Operation(
-            method = "GET",
             summary = "Listar todas as avaliações",
-            description = "Retorna uma lista de todas as avaliações ativas cadastradas no sistema.",
+            description = "Acesso público. Retorna todas as avaliações ativas cadastradas no sistema.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Lista de avaliações retornada com sucesso")
             }
@@ -41,9 +42,10 @@ public class AvaliacaoController {
     }
 
     @GetMapping("/{id}")
+    @SecurityRequirements
     @Operation(
-            summary = "Buscar por ID",
-            description = "Busca uma avaliação em específico através do ID",
+            summary = "Buscar avaliação por ID",
+            description = "Acesso público. Busca uma avaliação específica através do seu ID.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Avaliação encontrada com sucesso"),
                     @ApiResponse(responseCode = "404", description = "Avaliação não encontrada")
