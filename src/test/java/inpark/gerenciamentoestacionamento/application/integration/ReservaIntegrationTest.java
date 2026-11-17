@@ -113,7 +113,7 @@ public class ReservaIntegrationTest {
                 "123456"
         );
 
-        var responseEstacionamento = mockMvc.perform(withAuth(post("/estacionamento/" + dono.getId()), jwtService.generateToken(dono.getEmail(), dono.getRole().name()))
+        var responseEstacionamento = mockMvc.perform(withAuth(post("/dono/" + dono.getId() + "/estacionamentos"), jwtService.generateToken(dono.getEmail(), dono.getRole().name()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(estacionamentoRequest)))
                 .andExpect(status().isCreated())
@@ -165,7 +165,7 @@ public class ReservaIntegrationTest {
 
     @Test
     void deveCadastrarReservaValida() throws Exception {
-        mockMvc.perform(withAuth(post("/reserva")
+        mockMvc.perform(withAuth(post("/estacionamento/" + estacionamentoId + "/reservas")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(reservaRequestValido()))))
                 .andExpect(status().isCreated())
@@ -174,7 +174,7 @@ public class ReservaIntegrationTest {
 
     @Test
     void deveAtualizarReserva() throws Exception {
-        var response = mockMvc.perform(withAuth(post("/reserva")
+        var response = mockMvc.perform(withAuth(post("/estacionamento/" + estacionamentoId + "/reservas")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(reservaRequestValido()))))
                 .andExpect(status().isCreated())
@@ -200,7 +200,7 @@ public class ReservaIntegrationTest {
 
     @Test
     void deveDeletarReserva() throws Exception {
-        var response = mockMvc.perform(withAuth(post("/reserva")
+        var response = mockMvc.perform(withAuth(post("/estacionamento/" + estacionamentoId + "/reservas")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(reservaRequestValido()))))
                 .andExpect(status().isCreated())
@@ -214,7 +214,7 @@ public class ReservaIntegrationTest {
 
     @Test
     void deveBuscarReservaPorId() throws Exception {
-        var response = mockMvc.perform(withAuth(post("/reserva")
+        var response = mockMvc.perform(withAuth(post("/estacionamento/" + estacionamentoId + "/reservas")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(reservaRequestValido()))))
                 .andExpect(status().isCreated())
@@ -229,7 +229,7 @@ public class ReservaIntegrationTest {
 
     @Test
     void deveListarReservas() throws Exception {
-        mockMvc.perform(withAuth(post("/reserva")
+        mockMvc.perform(withAuth(post("/estacionamento/" + estacionamentoId + "/reservas")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(reservaRequestValido()))))
                 .andExpect(status().isCreated());

@@ -103,7 +103,7 @@ public class ValorIntegrationTest {
                 "123456"
         );
 
-        var response = mockMvc.perform(withAuth(post("/estacionamento/" + dono.getId())
+        var response = mockMvc.perform(withAuth(post("/dono/" + dono.getId() + "/estacionamentos")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(estacionamentoRequest))))
                 .andExpect(status().isCreated())
@@ -128,7 +128,7 @@ public class ValorIntegrationTest {
     void deveCadastrarValorValido() throws Exception {
         var dto = criarValorRequest(10.0);
 
-        mockMvc.perform(withAuth(post("/valor"))
+        mockMvc.perform(withAuth(post("/estacionamento/" + estacionamentoId + "/valores"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isCreated())
@@ -138,7 +138,7 @@ public class ValorIntegrationTest {
     @Test
     void deveAtualizarValor() throws Exception {
         var dto = criarValorRequest(10.0);
-        var salvoJson = mockMvc.perform(withAuth(post("/valor"))
+        var salvoJson = mockMvc.perform(withAuth(post("/estacionamento/" + estacionamentoId + "/valores"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isCreated())
@@ -159,7 +159,7 @@ public class ValorIntegrationTest {
     @Test
     void deveDeletarValor() throws Exception {
         var dto = criarValorRequest(10.0);
-        var salvo = mockMvc.perform(withAuth(post("/valor"))
+        var salvo = mockMvc.perform(withAuth(post("/estacionamento/" + estacionamentoId + "/valores"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isCreated())
@@ -174,7 +174,7 @@ public class ValorIntegrationTest {
     @Test
     void deveBuscarValorPorId() throws Exception {
         var dto = criarValorRequest(10.0);
-        var salvo = mockMvc.perform(withAuth(post("/valor"))
+        var salvo = mockMvc.perform(withAuth(post("/estacionamento/" + estacionamentoId + "/valores"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isCreated())
@@ -190,7 +190,7 @@ public class ValorIntegrationTest {
     @Test
     void deveListarValores() throws Exception {
         var dto = criarValorRequest(10.0);
-        mockMvc.perform(withAuth(post("/valor"))
+        mockMvc.perform(withAuth(post("/estacionamento/" + estacionamentoId + "/valores"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isCreated());

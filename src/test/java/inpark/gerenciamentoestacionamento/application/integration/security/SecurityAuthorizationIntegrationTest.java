@@ -139,7 +139,7 @@ class SecurityAuthorizationIntegrationTest {
             }
             """.formatted(estacionamentoId);
 
-        mockMvc.perform(post("/valor")
+        mockMvc.perform(post("/estacionamento/" + estacionamentoId + "/valores")
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(valorJson))
@@ -180,7 +180,7 @@ class SecurityAuthorizationIntegrationTest {
             """;
 
         mockMvc.perform(
-                post("/estacionamento/" + donoId)
+                post("/dono/" + donoId + "/estacionamentos")
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(estacionamentoJson)
@@ -202,7 +202,7 @@ class SecurityAuthorizationIntegrationTest {
             }
             """.formatted(clienteId);
 
-        mockMvc.perform(post("/carro")
+        mockMvc.perform(post("/cliente/" + clienteId + "/carros")
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(carroJson))
@@ -231,7 +231,7 @@ class SecurityAuthorizationIntegrationTest {
             }
             """;
 
-        mockMvc.perform(post("/estacionamento/" + donoId)
+        mockMvc.perform(post("/dono/" + donoId + "/estacionamentos")
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(estacionamentoJson))
@@ -265,7 +265,7 @@ class SecurityAuthorizationIntegrationTest {
             }
             """.formatted(clienteId, placa);
 
-        mockMvc.perform(post("/carro")
+        mockMvc.perform(post("/cliente/" + clienteId + "/carros")
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(carroJson))
@@ -288,7 +288,7 @@ class SecurityAuthorizationIntegrationTest {
             }
             """.formatted(estacionamentoId);
 
-        mockMvc.perform(post("/valor")
+        mockMvc.perform(post("/estacionamento/" + estacionamentoId + "/valores")
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(valorJson))

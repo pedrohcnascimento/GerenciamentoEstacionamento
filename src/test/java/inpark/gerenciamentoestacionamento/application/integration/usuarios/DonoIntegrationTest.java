@@ -117,7 +117,7 @@ public class DonoIntegrationTest {
                 "123456"
         );
 
-        String responseEstacionamentoString = mockMvc.perform(withAuth(post("/estacionamento/" + dono.getId())
+        String responseEstacionamentoString = mockMvc.perform(withAuth(post("/dono/" + dono.getId() + "/estacionamentos")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(estacionamentoRequest))))
                 .andExpect(status().isCreated())
@@ -146,7 +146,7 @@ public class DonoIntegrationTest {
                 "Modelo X",
                 "Cor Vermelha"
         );
-        String responseCarroString = mockMvc.perform(withAuth(post("/carro")
+        String responseCarroString = mockMvc.perform(withAuth(post("/cliente/" + testClient.getId() + "/carros")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(carroRequest))))
                 .andExpect(status().isCreated())

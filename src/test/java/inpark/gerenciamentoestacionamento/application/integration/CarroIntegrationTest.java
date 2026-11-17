@@ -95,7 +95,7 @@ public class CarroIntegrationTest {
 
     @Test
     void deveCadastrarCarroValido() throws Exception {
-        mockMvc.perform(withAuth(post("/carro")
+        mockMvc.perform(withAuth(post("/cliente/" + clienteId + "/carros")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(carroRequestPadrao()))))
                 .andExpect(status().isCreated())
@@ -106,7 +106,7 @@ public class CarroIntegrationTest {
 
     @Test
     void deveAtualizarCarro() throws Exception {
-        var response = mockMvc.perform(withAuth(post("/carro")
+        var response = mockMvc.perform(withAuth(post("/cliente/" + clienteId + "/carros")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(carroRequestPadrao()))))
                 .andExpect(status().isCreated())
@@ -127,7 +127,7 @@ public class CarroIntegrationTest {
 
     @Test
     void deveDeletarCarro() throws Exception {
-        var response = mockMvc.perform(withAuth(post("/carro")
+        var response = mockMvc.perform(withAuth(post("/cliente/" + clienteId + "/carros")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(carroRequestPadrao()))))
                 .andExpect(status().isCreated())
@@ -141,7 +141,7 @@ public class CarroIntegrationTest {
 
     @Test
     void deveBuscarCarroPorId() throws Exception {
-        var response = mockMvc.perform(withAuth(post("/carro")
+        var response = mockMvc.perform(withAuth(post("/cliente/" + clienteId + "/carros")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(carroRequestPadrao()))))
                 .andExpect(status().isCreated())
@@ -158,7 +158,7 @@ public class CarroIntegrationTest {
 
     @Test
     void deveListarCarros() throws Exception {
-        mockMvc.perform(withAuth(post("/carro")
+        mockMvc.perform(withAuth(post("/cliente/" + clienteId + "/carros")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(carroRequestPadrao()))))
                 .andExpect(status().isCreated());

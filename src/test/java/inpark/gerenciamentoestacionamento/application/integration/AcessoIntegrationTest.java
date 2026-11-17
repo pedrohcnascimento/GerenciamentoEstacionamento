@@ -114,7 +114,7 @@ public class AcessoIntegrationTest {
                 "123456"
         );
 
-        var responseEstacionamento = mockMvc.perform(withAuth(post("/estacionamento/" + dono.getId())
+        var responseEstacionamento = mockMvc.perform(withAuth(post("/dono/" + dono.getId() + "/estacionamentos")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(estacionamentoRequest))))
                 .andExpect(status().isCreated())
@@ -144,7 +144,7 @@ public class AcessoIntegrationTest {
                 "Modelo X",
                 "Cor Vermelha"
         );
-        mockMvc.perform(withAuth(post("/carro")
+        mockMvc.perform(withAuth(post("/cliente/" + cliente.getId() + "/carros")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(carroRequest))))
                 .andExpect(status().isCreated());
@@ -168,7 +168,7 @@ public class AcessoIntegrationTest {
 
     @Test
     void deveCadastrarAcessoValido() throws Exception {
-        mockMvc.perform(withAuth(post("/acesso")
+        mockMvc.perform(withAuth(post("/estacionamento/" + estacionamentoId + "/acessos")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(acessoRequestValido()))))
                 .andExpect(status().isCreated())
@@ -178,7 +178,7 @@ public class AcessoIntegrationTest {
 
     @Test
     void deveAtualizarAcesso() throws Exception {
-        var response = mockMvc.perform(withAuth(post("/acesso")
+        var response = mockMvc.perform(withAuth(post("/estacionamento/" + estacionamentoId + "/acessos")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(acessoRequestValido()))))
                 .andExpect(status().isCreated())
@@ -205,7 +205,7 @@ public class AcessoIntegrationTest {
 
     @Test
     void deveDeletarAcesso() throws Exception {
-        var response = mockMvc.perform(withAuth(post("/acesso")
+        var response = mockMvc.perform(withAuth(post("/estacionamento/" + estacionamentoId + "/acessos")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(acessoRequestValido()))))
                 .andExpect(status().isCreated())
@@ -219,7 +219,7 @@ public class AcessoIntegrationTest {
 
     @Test
     void deveBuscarAcessoPorId() throws Exception {
-        var response = mockMvc.perform(withAuth(post("/acesso")
+        var response = mockMvc.perform(withAuth(post("/estacionamento/" + estacionamentoId + "/acessos")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(acessoRequestValido()))))
                 .andExpect(status().isCreated())
@@ -235,7 +235,7 @@ public class AcessoIntegrationTest {
 
     @Test
     void deveListarAcessos() throws Exception {
-        mockMvc.perform(withAuth(post("/acesso")
+        mockMvc.perform(withAuth(post("/estacionamento/" + estacionamentoId + "/acessos")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(acessoRequestValido()))))
                 .andExpect(status().isCreated());

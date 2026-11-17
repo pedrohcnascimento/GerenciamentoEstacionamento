@@ -174,13 +174,14 @@ public class CitizenTechRequisitosIntegrationTest {
     void deveRetornar409QuandoPlacaDuplicada() throws Exception {
         CarroRequest carroReq = new CarroRequest(clienteId, "XYZ9K88", "Polo", "Prata");
 
-        mockMvc.perform(post("/carro")
+        mockMvc.perform(post("/cliente/" + clienteId + "/carros")
                         .header("Authorization", "Bearer " + clienteToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(carroReq)))
-                .andExpect(status().isCreated());
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.clienteId").value(clienteId));
 
-        mockMvc.perform(post("/carro")
+        mockMvc.perform(post("/cliente/" + clienteId + "/carros")
                         .header("Authorization", "Bearer " + clienteToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(carroReq)))

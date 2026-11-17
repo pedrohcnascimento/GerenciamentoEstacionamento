@@ -115,7 +115,7 @@ public class EstacionamentoIntegrationTest {
     void deveCadastrarEstacionamentoValido() throws Exception {
         var dto = estacionamentoRequest("EstacioPlay");
 
-        mockMvc.perform(withAuth(post("/estacionamento/" + donoId)
+        mockMvc.perform(withAuth(post("/dono/" + donoId + "/estacionamentos")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto))))
                 .andExpect(status().isCreated())
@@ -125,7 +125,7 @@ public class EstacionamentoIntegrationTest {
     @Test
     void deveAtualizarEstacionamento() throws Exception {
         var dto = estacionamentoRequest("EstacioPlay");
-        var salvoJson = mockMvc.perform(withAuth(post("/estacionamento/" + donoId)
+        var salvoJson = mockMvc.perform(withAuth(post("/dono/" + donoId + "/estacionamentos")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto))))
                 .andExpect(status().isCreated())
@@ -147,7 +147,7 @@ public class EstacionamentoIntegrationTest {
     @Test
     void deveDeletarEstacionamento() throws Exception {
         var dto = estacionamentoRequest("EstacioPlay");
-        var salvoJson = mockMvc.perform(withAuth(post("/estacionamento/" + donoId)
+        var salvoJson = mockMvc.perform(withAuth(post("/dono/" + donoId + "/estacionamentos")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto))))
                 .andExpect(status().isCreated())
@@ -171,7 +171,7 @@ public class EstacionamentoIntegrationTest {
     @Test
     void deveBuscarEstacionamentoPorId() throws Exception {
         var dto = estacionamentoRequest("EstacioPlay");
-        var salvoJson = mockMvc.perform(withAuth(post("/estacionamento/" + donoId)
+        var salvoJson = mockMvc.perform(withAuth(post("/dono/" + donoId + "/estacionamentos")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto))))
                 .andExpect(status().isCreated())
@@ -189,7 +189,7 @@ public class EstacionamentoIntegrationTest {
     @Test
     void deveListarEstacionamentos() throws Exception {
         var dto = estacionamentoRequest("EstacioPlay");
-        mockMvc.perform(withAuth(post("/estacionamento/" + donoId)
+        mockMvc.perform(withAuth(post("/dono/" + donoId + "/estacionamentos")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto))))
                 .andExpect(status().isCreated());

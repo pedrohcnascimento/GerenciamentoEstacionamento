@@ -181,7 +181,7 @@ public class AvaliacaoIntegrationTest {
 
     @Test
     void deveCadastrarAvaliacaoValida() throws Exception {
-        mockMvc.perform(withAuth(post("/avaliacao"))
+        mockMvc.perform(withAuth(post("/estacionamento/" + estacionamentoId + "/avaliacoes"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(avaliacaoRequestValida())))
                 .andExpect(status().isCreated())
@@ -193,7 +193,7 @@ public class AvaliacaoIntegrationTest {
 
     @Test
     void deveAtualizarAvaliacao() throws Exception {
-        var response = mockMvc.perform(withAuth(post("/avaliacao"))
+        var response = mockMvc.perform(withAuth(post("/estacionamento/" + estacionamentoId + "/avaliacoes"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(avaliacaoRequestValida())))
                 .andExpect(status().isCreated())
@@ -220,7 +220,7 @@ public class AvaliacaoIntegrationTest {
 
     @Test
     void deveDeletarAvaliacao() throws Exception {
-        var response = mockMvc.perform(withAuth(post("/avaliacao"))
+        var response = mockMvc.perform(withAuth(post("/estacionamento/" + estacionamentoId + "/avaliacoes"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(avaliacaoRequestValida())))
                 .andExpect(status().isCreated())
@@ -237,7 +237,7 @@ public class AvaliacaoIntegrationTest {
 
     @Test
     void deveBuscarAvaliacaoPorId() throws Exception {
-        var response = mockMvc.perform(withAuth(post("/avaliacao"))
+        var response = mockMvc.perform(withAuth(post("/estacionamento/" + estacionamentoId + "/avaliacoes"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(avaliacaoRequestValida())))
                 .andExpect(status().isCreated())
@@ -254,7 +254,7 @@ public class AvaliacaoIntegrationTest {
 
     @Test
     void deveListarAvaliacoes() throws Exception {
-        mockMvc.perform(withAuth(post("/avaliacao"))
+        mockMvc.perform(withAuth(post("/estacionamento/" + estacionamentoId + "/avaliacoes"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(avaliacaoRequestValida())))
                 .andExpect(status().isCreated());
@@ -267,7 +267,7 @@ public class AvaliacaoIntegrationTest {
                 LocalDateTime.now()
         );
 
-        mockMvc.perform(withAuth(post("/avaliacao"))
+        mockMvc.perform(withAuth(post("/estacionamento/" + estacionamentoId + "/avaliacoes"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(segundaAvaliacao)))
                 .andExpect(status().isCreated());
