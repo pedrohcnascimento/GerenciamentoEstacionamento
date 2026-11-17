@@ -31,7 +31,13 @@ public class EstacionamentoController {
     @Operation(
             method = "GET",
             summary = "Listar todos os estacionamentos",
-            description = "Retorna uma lista de todos os estacionamentos cadastrados no sistema."
+            description = "Retorna uma lista de todos os estacionamentos ativos cadastrados no sistema.",
+            responses = {
+                    @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                            responseCode = "200",
+                            description = "Lista de estacionamentos retornada com sucesso"
+                    )
+            }
     )
     public ResponseEntity<List<EstacionamentoResponse>> listarEstacionamentos() {
         return ResponseEntity.status(200).body(service.listarTodosOsEstacionamentos());
@@ -40,7 +46,17 @@ public class EstacionamentoController {
     @GetMapping("/{id}")
     @Operation(
             summary = "Buscar por ID",
-            description = "Busca uma entidade em especifico através de ID"
+            description = "Busca um estacionamento em específico através do ID",
+            responses = {
+                    @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                            responseCode = "200",
+                            description = "Estacionamento encontrado com sucesso"
+                    ),
+                    @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                            responseCode = "404",
+                            description = "Estacionamento não encontrado"
+                    )
+            }
     )
     public ResponseEntity<EstacionamentoResponse> buscarPorId(@PathVariable Long id) {
         return ResponseEntity.status(200).body(service.buscarPorId(id));
@@ -54,7 +70,7 @@ public class EstacionamentoController {
             description = "Cadastra um novo estacionamento no sistema com base nos dados fornecidos.",
             responses = {
                     @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                            responseCode = "200",
+                            responseCode = "201",
                             description = "Estacionamento cadastrado com sucesso"
                     ),
                     @io.swagger.v3.oas.annotations.responses.ApiResponse(
@@ -114,11 +130,11 @@ public class EstacionamentoController {
     @Operation(
             method = "DELETE",
             summary = "Desativar um estacionamento",
-            description = "Desativa um estacionamento existente com base no ID fornecido.",
+            description = "Desativa (soft delete) um estacionamento existente com base no ID fornecido.",
             responses = {
                     @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                            responseCode = "200",
-                            description = "Estacionamento desativado com sucesso"
+                            responseCode = "204",
+                            description = "Estacionamento desativado com sucesso (sem conteúdo no corpo)"
                     ),
                     @io.swagger.v3.oas.annotations.responses.ApiResponse(
                             responseCode = "404",

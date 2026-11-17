@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -30,7 +31,10 @@ public class AcessoController {
     @Operation(
             method = "GET",
             summary = "Listar todos os acessos",
-            description = "Retorna uma lista de todos os acessos cadastrados no sistema."
+            description = "Retorna uma lista de todos os acessos ativos cadastrados no sistema.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Lista de acessos retornada com sucesso")
+            }
     )
     public ResponseEntity<List<AcessoResponse>> listarAcessos() {
         return ResponseEntity.status(200).body(service.listarAcessos());
@@ -39,7 +43,11 @@ public class AcessoController {
     @GetMapping("/{id}")
     @Operation(
             summary = "Buscar por ID",
-            description = "Busca uma entidade em especifico através de ID"
+            description = "Busca um acesso em específico através do ID",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Acesso encontrado com sucesso"),
+                    @ApiResponse(responseCode = "404", description = "Acesso não encontrado")
+            }
     )
     public ResponseEntity<AcessoResponse> buscarPorId(@PathVariable Long id) {
         return ResponseEntity.status(200).body(service.buscarPorId(id));
@@ -50,6 +58,11 @@ public class AcessoController {
             method = "POST",
             summary = "Cadastrar novo acesso",
             description = "Adiciona um novo acesso ao sistema",
+            responses = {
+                    @ApiResponse(responseCode = "201", description = "Acesso cadastrado com sucesso"),
+                    @ApiResponse(responseCode = "400", description = "Requisição inválida"),
+                    @ApiResponse(responseCode = "404", description = "Estacionamento não encontrado")
+            },
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "Dados do acesso a ser cadastrado",
                     required = true,
@@ -76,7 +89,11 @@ public class AcessoController {
     @Operation(
             method = "PUT",
             summary = "Atualizar um acesso",
-            description = "Atualiza um acesso já cadastrado no sistema"
+            description = "Atualiza um acesso já cadastrado no sistema",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Acesso atualizado com sucesso"),
+                    @ApiResponse(responseCode = "404", description = "Acesso ou estacionamento não encontrado")
+            }
     )
     public ResponseEntity<AcessoResponse> atualizarAcesso(@PathVariable Long id, @RequestBody AcessoRequest dto) {
         return ResponseEntity.status(200).body(service.atualizarAcesso(dto, id));
@@ -86,7 +103,11 @@ public class AcessoController {
     @Operation(
             method = "DELETE",
             summary = "Deletar um acesso",
-            description = "Deleta um acesso já cadastrado no sistema"
+            description = "Desativa (soft delete) um acesso já cadastrado no sistema",
+            responses = {
+                    @ApiResponse(responseCode = "204", description = "Acesso desativado com sucesso (sem conteúdo no corpo)"),
+                    @ApiResponse(responseCode = "404", description = "Acesso não encontrado")
+            }
     )
     public ResponseEntity<Void> deletarAcesso(@PathVariable Long id) {
         service.deletarAcesso(id);

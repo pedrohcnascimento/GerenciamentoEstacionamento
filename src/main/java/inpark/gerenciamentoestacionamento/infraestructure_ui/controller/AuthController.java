@@ -17,6 +17,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -33,6 +35,10 @@ import java.util.Date;
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
+@Tag(
+        name = "Autenticação controller",
+        description = "Realiza operações de login, consulta de perfil autenticado e criação de usuário admin de teste"
+)
 public class AuthController {
     private final AuthService authService;
     private final PasswordEncoder passwordEncoder;
@@ -45,6 +51,10 @@ public class AuthController {
             method = "POST",
             summary = "Realizar login",
             description = "Retorna um token JWT caso o login seja válido",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Login realizado com sucesso"),
+                    @ApiResponse(responseCode = "401", description = "Credenciais inválidas")
+            },
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "Credenciais de acesso do usuário",
                     required = true,
@@ -68,6 +78,15 @@ public class AuthController {
     }
 
     @PostMapping("/me")
+    @Operation(
+            method = "POST",
+            summary = "Consultar dados do usuário autenticado",
+            description = "Retorna os dados do usuário correspondente ao token JWT enviado",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Dados do usuário retornados com sucesso"),
+                    @ApiResponse(responseCode = "401", description = "Token JWT ausente ou inválido")
+            }
+    )
     public ResponseEntity<?> me(Authentication authentication) {
         if (authentication == null || !(authentication.getPrincipal() instanceof UserDetails userDetails)) {
             return ResponseEntity.status(401).body(java.util.Map.of(
@@ -101,6 +120,14 @@ public class AuthController {
     }
 
     @PostMapping("/criar-admin")
+    @Operation(
+            method = "POST",
+            summary = "Criar usuário ADMIN de teste",
+            description = "Cria o usuário admin@teste.com (senha 123456) para testes em ambiente de desenvolvimento",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Admin criado ou já existente")
+            }
+    )
     public String criarAdminTeste() {
         if (clienteRepository.findByEmail("admin@teste.com").isPresent()) {
             return "Admin já existe!";
