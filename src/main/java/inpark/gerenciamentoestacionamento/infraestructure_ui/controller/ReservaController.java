@@ -53,27 +53,6 @@ public class ReservaController {
         return ResponseEntity.status(200).body(service.buscarPorId(id));
     }
 
-    @PostMapping
-    @Operation(
-            method = "POST",
-            summary = "Cadastrar reserva",
-            description = "Cadastra uma nova reserva no sistema",
-            responses = {
-                    @ApiResponse(responseCode = "201", description = "Reserva cadastrada com sucesso"),
-                    @ApiResponse(responseCode = "400", description = "Requisição inválida"),
-                    @ApiResponse(responseCode = "404", description = "Cliente ou estacionamento não encontrado"),
-                    @ApiResponse(responseCode = "409", description = "Não há vagas disponíveis para confirmar a reserva")
-            }
-    )
-    public ResponseEntity<ReservaResponse> cadastrarReserva(@RequestBody @Valid ReservaRequest dto) {
-        ReservaResponse criado = service.cadastrarReserva(dto);
-        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
-                .path("/{id}")
-                .buildAndExpand(criado.id())
-                .toUri();
-        return ResponseEntity.created(location).body(criado);
-    }
-
     @PutMapping("/{id}")
     @Operation(
             method = "PUT",

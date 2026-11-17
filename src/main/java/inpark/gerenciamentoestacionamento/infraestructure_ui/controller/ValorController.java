@@ -52,25 +52,6 @@ public class ValorController {
         return ResponseEntity.status(200).body(service.buscarPorId(id));
     }
 
-    @PostMapping
-    @Operation(
-            summary = "Cadastrar valor",
-            description = "Cadastra um novo valor no sistema",
-            responses = {
-                    @ApiResponse(responseCode = "201", description = "Valor cadastrado com sucesso"),
-                    @ApiResponse(responseCode = "400", description = "Requisição inválida"),
-                    @ApiResponse(responseCode = "404", description = "Estacionamento não encontrado")
-            }
-    )
-    public ResponseEntity<ValorResponse> cadastrarValor(@RequestBody @Valid ValorRequest dto) {
-        ValorResponse criado = service.cadastrarValor(dto);
-        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
-                .path("/{id}")
-                .buildAndExpand(criado.id())
-                .toUri();
-        return ResponseEntity.created(location).body(criado);
-    }
-
     @PutMapping("/{id}")
     @Operation(
             summary = "Atualizar valor",

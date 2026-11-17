@@ -66,7 +66,7 @@ public class SecurityConfig {
                                 Role.CLIENTE.name(),
                                 Role.ADMIN.name())
                         .requestMatchers(HttpMethod.POST, "/cliente", "/dono").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/gerente", "/valor", "/dono/*/estacionamentos").hasAnyRole(
+                        .requestMatchers(HttpMethod.POST, "/gerente", "/valor", "/dono/*/estacionamentos", "/estacionamento/*/valores").hasAnyRole(
                                 Role.DONO.name(),
                                 Role.ADMIN.name())
                         .requestMatchers(HttpMethod.POST, "/estacionamento/**", "/acesso", "/acesso/**").hasAnyRole(

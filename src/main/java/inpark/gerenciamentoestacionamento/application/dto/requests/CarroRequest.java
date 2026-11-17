@@ -2,16 +2,14 @@ package inpark.gerenciamentoestacionamento.application.dto.requests;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 public record CarroRequest(
         @Schema(
                 name = "clienteId",
                 example = "3",
-                description = "ID do usuario proprietário do carro"
+                description = "ID do usuário proprietário do carro (opcional nas rotas /cliente/{id}/carros e /cliente/me/carros)"
         )
-        @NotNull(message = "O clienteId é obrigatório")
         Long clienteId,
         @Schema(
                 name = "placa",

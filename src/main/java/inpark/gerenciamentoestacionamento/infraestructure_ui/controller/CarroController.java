@@ -52,26 +52,6 @@ public class CarroController {
         return ResponseEntity.status(200).body(service.buscarPorId(id));
     }
 
-    @PostMapping
-    @Operation(
-            summary = "Cadastrar carro",
-            description = "Cadastra um novo carro no sistema",
-            responses = {
-                    @ApiResponse(responseCode = "201", description = "Carro cadastrado com sucesso"),
-                    @ApiResponse(responseCode = "400", description = "Requisição inválida"),
-                    @ApiResponse(responseCode = "404", description = "Cliente não encontrado"),
-                    @ApiResponse(responseCode = "409", description = "Placa já cadastrada")
-            }
-    )
-    public ResponseEntity<CarroResponse> cadastrarCarro(@RequestBody @Valid CarroRequest dto) {
-        CarroResponse criado = service.cadastrarCarro(dto);
-        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
-                .path("/{id}")
-                .buildAndExpand(criado.id())
-                .toUri();
-        return ResponseEntity.created(location).body(criado);
-    }
-
     @PutMapping("/{id}")
     @Operation(
             summary = "Atualizar carro",

@@ -38,6 +38,12 @@ public class ClienteService {
         return ClienteMapper.fromEntity(optionalCliente.get());
     }
 
+    public ClienteResponse buscarPorEmail(String email) {
+        Cliente cliente = ClienteDao.findByEmail(email)
+                .orElseThrow(() -> new IdNaoCadastrado("Cliente autenticado não encontrado no sistema!"));
+        return ClienteMapper.fromEntity(cliente);
+    }
+
     public ClienteResponse cadastrarCliente(ClienteRequest dto) {
         if (dto.email() != null && ClienteDao.findByEmail(dto.email()).isPresent()) {
             throw new ConflitoDeRegraDeNegocioException("Já existe um cliente cadastrado com este e-mail.");

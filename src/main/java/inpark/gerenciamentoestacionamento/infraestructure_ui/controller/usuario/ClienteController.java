@@ -1,12 +1,7 @@
 package inpark.gerenciamentoestacionamento.infraestructure_ui.controller.usuario;
 
-import inpark.gerenciamentoestacionamento.application.dto.requests.CarroRequest;
 import inpark.gerenciamentoestacionamento.application.dto.requests.usuario.ClienteRequest;
-import inpark.gerenciamentoestacionamento.application.dto.response.CarroResponse;
-import inpark.gerenciamentoestacionamento.application.dto.response.ReservaResponse;
 import inpark.gerenciamentoestacionamento.application.dto.response.usuario.ClienteResponse;
-import inpark.gerenciamentoestacionamento.application.services.CarroService;
-import inpark.gerenciamentoestacionamento.application.services.ReservaService;
 import inpark.gerenciamentoestacionamento.application.services.usuario.ClienteService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -25,17 +20,13 @@ import java.util.List;
 @RequestMapping("/cliente")
 @Tag(
         name = "2. Clientes",
-        description = "CRUD de clientes e rotas aninhadas 1:N (carros e reservas do cliente)"
+        description = "Cadastro, consulta, atualização e remoção de clientes"
 )
 public class ClienteController {
     private final ClienteService service;
-    private final CarroService carroService;
-    private final ReservaService reservaService;
 
-    public ClienteController(ClienteService service, CarroService carroService, ReservaService reservaService) {
+    public ClienteController(ClienteService service) {
         this.service = service;
-        this.carroService = carroService;
-        this.reservaService = reservaService;
     }
 
     @GetMapping
@@ -112,52 +103,5 @@ public class ClienteController {
     public ResponseEntity<Void> deletarCliente(@PathVariable Long id) {
         service.deletarCliente(id);
         return ResponseEntity.status(204).build();
-    }
-
-    @GetMapping("/{id}/carros")
-    @Operation(
-            summary = "Listar carros do cliente (1:N)",
-            description = "Requer perfil CLIENTE, DONO, GERENTE ou ADMIN. Retorna os carros ativos vinculados ao cliente.",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Lista de carros retornada com sucesso"),
-                    @ApiResponse(responseCode = "404", description = "Cliente não encontrado")
-            }
-    )
-    public ResponseEntity<List<CarroResponse>> listarCarrosDoCliente(@Parameter(description = "ID do cliente") @PathVariable Long id) {
-        return ResponseEntity.ok(carroService.listarPorCliente(id));
-    }
-
-    @PostMapping("/{id}/carros")
-    @Operation(
-            summary = "Cadastrar carro para o cliente (1:N)",
-            description = "Requer perfil CLIENTE ou ADMIN. Cadastra um novo carro vinculado automaticamente ao cliente informado na URL.",
-            responses = {
-                    @ApiResponse(responseCode = "201", description = "Carro cadastrado com sucesso"),
-                    @ApiResponse(responseCode = "400", description = "Dados inválidos (Bean Validation)"),
-                    @ApiResponse(responseCode = "404", description = "Cliente não encontrado"),
-                    @ApiResponse(responseCode = "409", description = "Placa já cadastrada")
-            }
-    )
-    public ResponseEntity<CarroResponse> cadastrarCarroDoCliente(@Parameter(description = "ID do cliente proprietário do carro") @PathVariable Long id, @RequestBody @Valid CarroRequest dto) {
-        CarroRequest req = new CarroRequest(id, dto.placa(), dto.modelo(), dto.cor());
-        CarroResponse criado = carroService.cadastrarCarro(req);
-        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
-                .path("/{carroId}")
-                .buildAndExpand(criado.id())
-                .toUri();
-        return ResponseEntity.created(location).body(criado);
-    }
-
-    @GetMapping("/{id}/reservas")
-    @Operation(
-            summary = "Listar reservas do cliente (1:N)",
-            description = "Requer perfil CLIENTE, DONO, GERENTE ou ADMIN. Retorna todas as reservas ativas do cliente informado.",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Lista de reservas retornada com sucesso"),
-                    @ApiResponse(responseCode = "404", description = "Cliente não encontrado")
-            }
-    )
-    public ResponseEntity<List<ReservaResponse>> listarReservasDoCliente(@Parameter(description = "ID do cliente") @PathVariable Long id) {
-        return ResponseEntity.ok(reservaService.listarPorCliente(id));
     }
 }

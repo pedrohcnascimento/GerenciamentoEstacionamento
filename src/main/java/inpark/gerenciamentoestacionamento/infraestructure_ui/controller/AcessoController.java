@@ -56,43 +56,6 @@ public class AcessoController {
         return ResponseEntity.status(200).body(service.buscarPorId(id));
     }
 
-    @PostMapping
-    @Operation(
-            method = "POST",
-            summary = "Cadastrar novo acesso",
-            description = "Adiciona um novo acesso ao sistema",
-            responses = {
-                    @ApiResponse(responseCode = "201", description = "Acesso cadastrado com sucesso"),
-                    @ApiResponse(responseCode = "400", description = "Requisição inválida"),
-                    @ApiResponse(responseCode = "404", description = "Estacionamento não encontrado")
-            },
-            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    description = "Dados do acesso a ser cadastrado",
-                    required = true,
-                    content = @Content(
-                            schema = @Schema(implementation = AcessoRequest.class),
-                            examples = @ExampleObject(value = """
-                                    {
-                                      "carroId": 1,
-                                      "placaDoCarro": "EUD8679",
-                                      "horaDeEntrada": "09:38:51",
-                                      "horaDeSaida": "19:38:51",
-                                      "valorAPagar": 100.00,
-                                      "estacioId": 1
-                                    }
-                                    """)
-                    )
-            )
-    )
-    public ResponseEntity<AcessoResponse> cadastrarAcesso(@RequestBody @Valid AcessoRequest dto) {
-        AcessoResponse criado = service.cadastrarAcesso(dto);
-        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
-                .path("/{id}")
-                .buildAndExpand(criado.id())
-                .toUri();
-        return ResponseEntity.created(location).body(criado);
-    }
-
     @PutMapping("/{id}")
     @Operation(
             method = "PUT",

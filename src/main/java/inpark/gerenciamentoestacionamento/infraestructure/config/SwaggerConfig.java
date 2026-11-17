@@ -35,15 +35,18 @@ public class SwaggerConfig {
                 )
                 .tags(List.of(
                         new Tag().name("1. Autenticação").description("Login JWT, consulta do usuário autenticado e geração de admin de teste"),
-                        new Tag().name("2. Clientes").description("CRUD de clientes e rotas aninhadas 1:N (carros e reservas do cliente)"),
-                        new Tag().name("3. Donos de Estacionamento").description("CRUD de proprietários e rota aninhada 1:N (estacionamentos do proprietário)"),
-                        new Tag().name("4. Gerentes").description("CRUD de gerentes vinculados a estacionamentos"),
-                        new Tag().name("5. Estacionamentos").description("CRUD de estacionamentos e rotas aninhadas 1:N (reservas, tarifas, acessos e avaliações)"),
-                        new Tag().name("6. Carros").description("CRUD direto de veículos"),
-                        new Tag().name("7. Tarifas e Valores").description("CRUD direto de tabelas de preços e cobranças"),
-                        new Tag().name("8. Reservas").description("CRUD direto de reservas de vagas"),
-                        new Tag().name("9. Acessos (Entrada e Saída)").description("CRUD direto de registros de entrada e saída de veículos"),
-                        new Tag().name("10. Avaliações").description("CRUD direto de avaliações de estacionamentos")
+                        new Tag().name("2. Clientes").description("Cadastro, consulta, atualização e remoção de clientes"),
+                        new Tag().name("3. Donos de Estacionamento").description("Cadastro, consulta, atualização e remoção de proprietários"),
+                        new Tag().name("4. Gerentes").description("Cadastro, consulta, atualização e remoção de gerentes"),
+                        new Tag().name("5. Estacionamentos").description("Consulta, atualização e remoção de estacionamentos"),
+                        new Tag().name("6. Carros").description("Consulta, atualização e remoção de veículos"),
+                        new Tag().name("7. Tarifas e Valores").description("Consulta, atualização e remoção de tarifas"),
+                        new Tag().name("8. Reservas").description("Consulta, atualização e remoção de reservas"),
+                        new Tag().name("9. Acessos (Entrada e Saída)").description("Consulta, atualização e remoção de acessos"),
+                        new Tag().name("10. Avaliações").description("Consulta, atualização e remoção de avaliações"),
+                        new Tag().name("11. Rotas 1:N — Cliente").description("Operações aninhadas vinculadas a um Cliente (carros e reservas)"),
+                        new Tag().name("12. Rotas 1:N — Dono").description("Operações aninhadas vinculadas a um Dono (estacionamentos)"),
+                        new Tag().name("13. Rotas 1:N — Estacionamento").description("Operações aninhadas vinculadas a um Estacionamento (reservas, tarifas, acessos e avaliações)")
                 ))
                 .addSecurityItem(new SecurityRequirement().addList("Bearer authentication"))
                 .components(new Components()

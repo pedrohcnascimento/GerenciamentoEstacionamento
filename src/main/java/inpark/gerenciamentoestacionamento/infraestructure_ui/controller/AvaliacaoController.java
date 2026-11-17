@@ -55,26 +55,6 @@ public class AvaliacaoController {
         return ResponseEntity.status(200).body(service.buscarPorId(id));
     }
 
-    @PostMapping
-    @Operation(
-            method = "POST",
-            summary = "Cadastrar nova avaliação",
-            description = "Adiciona uma nova avaliação ao sistema",
-            responses = {
-                    @ApiResponse(responseCode = "201", description = "Avaliação cadastrada com sucesso"),
-                    @ApiResponse(responseCode = "400", description = "Avaliação inválida ou comentário muito longo"),
-                    @ApiResponse(responseCode = "404", description = "Cliente ou estacionamento não encontrado")
-            }
-    )
-    public ResponseEntity<AvaliacaoResponse> cadastrarAvaliacao(@RequestBody @Valid AvaliacaoRequest dto) {
-        AvaliacaoResponse criado = service.cadastrarAvaliacao(dto);
-        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
-                .path("/{id}")
-                .buildAndExpand(criado.id())
-                .toUri();
-        return ResponseEntity.created(location).body(criado);
-    }
-
     @PutMapping("/{id}")
     @Operation(
             method = "PUT",
