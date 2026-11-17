@@ -1,6 +1,6 @@
 # Inpark — Gerenciamento de Estacionamento (Backend)
 
-API REST em **Java 21 + Spring Boot** para gerenciamento e reserva de vagas de estacionamento, implementando todas as funcionalidades do repositório de referência [`Arthur2060/Inpark-backend`](https://github.com/Arthur2060/Inpark-backend) e estruturada para evolução conforme a especificação **Global Solution 2026/2 · CitizenTech FIAP**.
+API REST em **Java 21 + Spring Boot** para gerenciamento e reserva de vagas de estacionamento da plataforma **Inpark**, estruturada conforme a especificação **Global Solution 2026/2 · CitizenTech FIAP**.
 
 ---
 
