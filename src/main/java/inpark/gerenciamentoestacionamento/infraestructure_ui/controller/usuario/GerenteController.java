@@ -27,7 +27,13 @@ public class GerenteController {
     @GetMapping
     @Operation(
             summary = "Listar todos os gerentes",
-            description = "Retorna uma lista de todos os gerentes cadastrados no sistema."
+            description = "Retorna uma lista de todos os gerentes ativos cadastrados no sistema.",
+            responses = {
+                    @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                            responseCode = "200",
+                            description = "Lista de gerentes retornada com sucesso"
+                    )
+            }
     )
     public ResponseEntity<List<GerenteResponse>> listarGerentes() {
         return ResponseEntity.status(200).body(service.listarGerentes());
@@ -36,7 +42,17 @@ public class GerenteController {
     @GetMapping("/{id}")
     @Operation(
             summary = "Buscar por ID",
-            description = "Busca uma entidade em especifico através de ID"
+            description = "Busca um gerente em específico através do ID",
+            responses = {
+                    @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                            responseCode = "200",
+                            description = "Gerente encontrado com sucesso"
+                    ),
+                    @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                            responseCode = "404",
+                            description = "Gerente não encontrado"
+                    )
+            }
     )
     public ResponseEntity<GerenteResponse> buscarPorId(@PathVariable Long id) {
         return ResponseEntity.status(200).body(service.buscarPorId(id));
@@ -48,7 +64,7 @@ public class GerenteController {
             description = "Cadastra um novo gerente no sistema com base nos dados fornecidos.",
             responses = {
                     @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                            responseCode = "200",
+                            responseCode = "201",
                             description = "Gerente cadastrado com sucesso"
                     ),
                     @io.swagger.v3.oas.annotations.responses.ApiResponse(
@@ -83,11 +99,11 @@ public class GerenteController {
     @DeleteMapping("/{id}")
     @Operation(
             summary = "Deletar um gerente",
-            description = "Deleta um gerente existente com base no ID fornecido.",
+            description = "Desativa (soft delete) um gerente existente com base no ID fornecido.",
             responses = {
                     @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                            responseCode = "200",
-                            description = "Gerente deletado com sucesso"
+                            responseCode = "204",
+                            description = "Gerente deletado com sucesso (sem conteúdo no corpo)"
                     ),
                     @io.swagger.v3.oas.annotations.responses.ApiResponse(
                             responseCode = "404",

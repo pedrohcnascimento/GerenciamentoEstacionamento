@@ -26,7 +26,13 @@ public class ClienteController {
     @GetMapping
     @Operation(
             summary = "Listar todos os clientes",
-            description = "Retorna uma lista de todos os clientes cadastrados no sistema."
+            description = "Retorna uma lista de todos os clientes ativos cadastrados no sistema.",
+            responses = {
+                    @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                            responseCode = "200",
+                            description = "Lista de clientes retornada com sucesso"
+                    )
+            }
     )
     public ResponseEntity<List<ClienteResponse>> listarClientes() {
         return ResponseEntity.status(200).body(service.listarClientes());
@@ -35,7 +41,17 @@ public class ClienteController {
     @GetMapping("/{id}")
     @Operation(
             summary = "Buscar por ID",
-            description = "Busca uma entidade em especifico através de ID"
+            description = "Busca um cliente em específico através do ID",
+            responses = {
+                    @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                            responseCode = "200",
+                            description = "Cliente encontrado com sucesso"
+                    ),
+                    @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                            responseCode = "404",
+                            description = "Cliente não encontrado"
+                    )
+            }
     )
     public ResponseEntity<ClienteResponse> buscarPorId(@PathVariable Long id) {
         return ResponseEntity.status(200).body(service.buscarPorId(id));
@@ -47,7 +63,7 @@ public class ClienteController {
             description = "Cadastra um novo cliente no sistema com base nos dados fornecidos.",
             responses = {
                     @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                            responseCode = "200",
+                            responseCode = "201",
                             description = "Cliente cadastrado com sucesso"
                     ),
                     @io.swagger.v3.oas.annotations.responses.ApiResponse(
@@ -82,11 +98,11 @@ public class ClienteController {
     @DeleteMapping("/{id}")
     @Operation(
             summary = "Deletar um cliente",
-            description = "Deleta um cliente existente com base no ID fornecido.",
+            description = "Desativa (soft delete) um cliente existente com base no ID fornecido.",
             responses = {
                     @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                            responseCode = "200",
-                            description = "Cliente deletado com sucesso"
+                            responseCode = "204",
+                            description = "Cliente deletado com sucesso (sem conteúdo no corpo)"
                     ),
                     @io.swagger.v3.oas.annotations.responses.ApiResponse(
                             responseCode = "404",
