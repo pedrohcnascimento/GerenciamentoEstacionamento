@@ -4,7 +4,7 @@ import inpark.gerenciamentoestacionamento.application.dto.requests.usuario.DonoR
 import inpark.gerenciamentoestacionamento.application.dto.response.usuario.DonoResponse;
 import inpark.gerenciamentoestacionamento.application.mappers.usuario.DonoMapper;
 import inpark.gerenciamentoestacionamento.application.services.usuario.DonoService;
-import inpark.gerenciamentoestacionamento.infraestructure.repositories.usuario.DonoRepository;
+import inpark.gerenciamentoestacionamento.dao.DonoDao;
 import inpark.gerenciamentoestacionamento.model.entities.usuarios.DonoEstacionamento;
 import inpark.gerenciamentoestacionamento.model.exceptions.IdNaoCadastrado;
 import org.junit.jupiter.api.Test;
@@ -24,7 +24,7 @@ import static org.mockito.Mockito.*;
 public class DonoServiceTest {
 
     @Mock
-    private DonoRepository repository;
+    private DonoDao repository;
     @Mock
     private PasswordEncoder passwordEncoder;
     @InjectMocks

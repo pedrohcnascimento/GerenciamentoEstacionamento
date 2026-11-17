@@ -1,9 +1,9 @@
 package inpark.gerenciamentoestacionamento.application.integration.security;
 
 import inpark.gerenciamentoestacionamento.GerenciamentoEstacionamentoApplication;
-import inpark.gerenciamentoestacionamento.infraestructure.repositories.EstacionamentoRepository;
-import inpark.gerenciamentoestacionamento.infraestructure.repositories.usuario.ClienteRepository;
-import inpark.gerenciamentoestacionamento.infraestructure.repositories.usuario.DonoRepository;
+import inpark.gerenciamentoestacionamento.dao.EstacionamentoDao;
+import inpark.gerenciamentoestacionamento.dao.ClienteDao;
+import inpark.gerenciamentoestacionamento.dao.DonoDao;
 import inpark.gerenciamentoestacionamento.infraestructure.security.JwtService;
 import inpark.gerenciamentoestacionamento.infraestructure.security.UsuarioDetailService;
 import inpark.gerenciamentoestacionamento.model.entities.Estacionamento;
@@ -39,13 +39,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class SecurityAuthorizationIntegrationTest {
 
     @Autowired
-    private DonoRepository donoRepository;
+    private DonoDao DonoDao;
 
     @Autowired
-    private ClienteRepository clienteRepository;
+    private ClienteDao ClienteDao;
 
     @Autowired
-    private EstacionamentoRepository estacionamentoRepository;
+    private EstacionamentoDao EstacionamentoDao;
 
     @Autowired
     private MockMvc mockMvc;
@@ -79,7 +79,7 @@ class SecurityAuthorizationIntegrationTest {
                 .tipoDeUsuario(TipoDeUsuario.DONO)
                 .status(true)
                 .build();
-        dono = donoRepository.save(dono);
+        dono = DonoDao.save(dono);
         donoId = dono.getId();
 
         Cliente cliente = Cliente.builder()
@@ -91,7 +91,7 @@ class SecurityAuthorizationIntegrationTest {
                 .tipoDeUsuario(TipoDeUsuario.CLIENTE)
                 .status(true)
                 .build();
-        cliente = clienteRepository.save(cliente);
+        cliente = ClienteDao.save(cliente);
         clienteId = cliente.getId();
 
         Estacionamento est = Estacionamento.builder()
@@ -109,7 +109,7 @@ class SecurityAuthorizationIntegrationTest {
                 .numeroDeEscrituraImovel("ESC-" + UUID.randomUUID().toString().substring(0, 8))
                 .dono(dono)
                 .build();
-        est = estacionamentoRepository.save(est);
+        est = EstacionamentoDao.save(est);
         estacionamentoId = est.getId();
 
         token = jwtService.generateToken(dono.getEmail(), dono.getRole().name());

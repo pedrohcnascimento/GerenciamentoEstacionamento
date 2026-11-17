@@ -1,8 +1,8 @@
 package inpark.gerenciamentoestacionamento.model.service;
 
-import inpark.gerenciamentoestacionamento.infraestructure.repositories.AvaliacaoRepository;
-import inpark.gerenciamentoestacionamento.infraestructure.repositories.EstacionamentoRepository;
-import inpark.gerenciamentoestacionamento.infraestructure.repositories.usuario.ClienteRepository;
+import inpark.gerenciamentoestacionamento.dao.AvaliacaoDao;
+import inpark.gerenciamentoestacionamento.dao.EstacionamentoDao;
+import inpark.gerenciamentoestacionamento.dao.ClienteDao;
 import inpark.gerenciamentoestacionamento.model.entities.Avaliacao;
 import inpark.gerenciamentoestacionamento.model.entities.Estacionamento;
 import inpark.gerenciamentoestacionamento.model.entities.usuarios.Cliente;
@@ -17,16 +17,16 @@ import java.time.temporal.ChronoUnit;
 @Service
 public class ValidadorAvaliacao {
 
-    private final AvaliacaoRepository avaliacaoRepository;
-    private final ClienteRepository clienteRepository;
-    private final EstacionamentoRepository estacionamentoRepository;
+    private final AvaliacaoDao AvaliacaoDao;
+    private final ClienteDao ClienteDao;
+    private final EstacionamentoDao EstacionamentoDao;
 
-    public ValidadorAvaliacao(AvaliacaoRepository avaliacaoRepository,
-                              ClienteRepository clienteRepository,
-                              EstacionamentoRepository estacionamentoRepository) {
-        this.avaliacaoRepository = avaliacaoRepository;
-        this.clienteRepository = clienteRepository;
-        this.estacionamentoRepository = estacionamentoRepository;
+    public ValidadorAvaliacao(AvaliacaoDao AvaliacaoDao,
+                              ClienteDao ClienteDao,
+                              EstacionamentoDao EstacionamentoDao) {
+        this.AvaliacaoDao = AvaliacaoDao;
+        this.ClienteDao = ClienteDao;
+        this.EstacionamentoDao = EstacionamentoDao;
     }
 
     private boolean mesmoEstacionamento(Estacionamento a, Estacionamento b) {

@@ -3,8 +3,8 @@ package inpark.gerenciamentoestacionamento.application.unit;
 import inpark.gerenciamentoestacionamento.application.dto.requests.EstacionamentoRequest;
 import inpark.gerenciamentoestacionamento.application.dto.response.EstacionamentoResponse;
 import inpark.gerenciamentoestacionamento.application.services.EstacionamentoService;
-import inpark.gerenciamentoestacionamento.infraestructure.repositories.EstacionamentoRepository;
-import inpark.gerenciamentoestacionamento.infraestructure.repositories.usuario.DonoRepository;
+import inpark.gerenciamentoestacionamento.dao.EstacionamentoDao;
+import inpark.gerenciamentoestacionamento.dao.DonoDao;
 import inpark.gerenciamentoestacionamento.model.entities.Estacionamento;
 import inpark.gerenciamentoestacionamento.model.entities.usuarios.DonoEstacionamento;
 import inpark.gerenciamentoestacionamento.model.exceptions.IdNaoCadastrado;
@@ -28,9 +28,9 @@ import static org.mockito.Mockito.*;
 public class EstacionamentoServiceTest {
 
     @Mock
-    private EstacionamentoRepository estacionamentoRepository;
+    private EstacionamentoDao EstacionamentoDao;
     @Mock
-    private DonoRepository donoRepository;
+    private DonoDao DonoDao;
     @InjectMocks
     private EstacionamentoService estacionamentoService;
 
@@ -83,77 +83,77 @@ public class EstacionamentoServiceTest {
 
     @Test
     void deveListarTodosOsEstacionamentos() {
-        when(estacionamentoRepository.findByStatusTrue()).thenReturn(List.of(estacionamento));
+        when(EstacionamentoDao.findByStatusTrue()).thenReturn(List.of(estacionamento));
         List<EstacionamentoResponse> lista = estacionamentoService.listarTodosOsEstacionamentos();
         assertEquals(1, lista.size());
         assertEquals("EstacioPlay", lista.get(0).nome());
-        verify(estacionamentoRepository).findByStatusTrue();
+        verify(EstacionamentoDao).findByStatusTrue();
     }
 
     @Test
     void deveBuscarEstacionamentoPorId() {
-        when(estacionamentoRepository.findById(1L)).thenReturn(Optional.of(estacionamento));
+        when(EstacionamentoDao.findById(1L)).thenReturn(Optional.of(estacionamento));
         EstacionamentoResponse response = estacionamentoService.buscarPorId(1L);
         assertEquals("EstacioPlay", response.nome());
-        verify(estacionamentoRepository).findById(1L);
+        verify(EstacionamentoDao).findById(1L);
     }
 
     @Test
     void deveLancarExcecaoAoBuscarIdNaoCadastrado() {
-        when(estacionamentoRepository.findById(2L)).thenReturn(Optional.empty());
+        when(EstacionamentoDao.findById(2L)).thenReturn(Optional.empty());
         IdNaoCadastrado ex = assertThrows(IdNaoCadastrado.class, () -> estacionamentoService.buscarPorId(2L));
         assertEquals("ID buscado não foi encontrado no sistema!", ex.getMessage());
     }
 
     @Test
     void deveCadastrarEstacionamento() {
-        when(donoRepository.findById(1L)).thenReturn(Optional.of(dono));
-        when(estacionamentoRepository.save(any(Estacionamento.class))).thenReturn(estacionamento);
+        when(DonoDao.findById(1L)).thenReturn(Optional.of(dono));
+        when(EstacionamentoDao.save(any(Estacionamento.class))).thenReturn(estacionamento);
 
         EstacionamentoResponse response = estacionamentoService.cadastrarEstacionamento(estacionamentoRequest, 1L);
         assertEquals("EstacioPlay", response.nome());
         assertTrue(response.status());
-        verify(estacionamentoRepository).save(any(Estacionamento.class));
+        verify(EstacionamentoDao).save(any(Estacionamento.class));
     }
 
     @Test
     void deveLancarExcecaoAoCadastrarComDonoInexistente() {
-        when(donoRepository.findById(2L)).thenReturn(Optional.empty());
+        when(DonoDao.findById(2L)).thenReturn(Optional.empty());
         IdNaoCadastrado ex = assertThrows(IdNaoCadastrado.class, () -> estacionamentoService.cadastrarEstacionamento(estacionamentoRequest, 2L));
         assertEquals("O Id do dono fornecido não foi encontrado no sistema!", ex.getMessage());
     }
 
     @Test
     void deveAtualizarEstacionamento() {
-        when(estacionamentoRepository.findById(1L)).thenReturn(Optional.of(estacionamento));
-        when(estacionamentoRepository.save(any(Estacionamento.class))).thenReturn(estacionamento);
+        when(EstacionamentoDao.findById(1L)).thenReturn(Optional.of(estacionamento));
+        when(EstacionamentoDao.save(any(Estacionamento.class))).thenReturn(estacionamento);
 
         EstacionamentoResponse response = estacionamentoService.atualizarEstacionamento(estacionamentoRequest, 1L);
         assertEquals("EstacioPlay", response.nome());
-        verify(estacionamentoRepository).save(any(Estacionamento.class));
+        verify(EstacionamentoDao).save(any(Estacionamento.class));
     }
 
     @Test
     void deveLancarExcecaoAoAtualizarIdNaoCadastrado() {
-        when(estacionamentoRepository.findById(2L)).thenReturn(Optional.empty());
+        when(EstacionamentoDao.findById(2L)).thenReturn(Optional.empty());
         IdNaoCadastrado ex = assertThrows(IdNaoCadastrado.class, () -> estacionamentoService.atualizarEstacionamento(estacionamentoRequest, 2L));
         assertEquals("O Id do estacionamento fornecido não foi encontrado no sistema!", ex.getMessage());
     }
 
     @Test
     void deveDesativarEstacionamento() {
-        when(estacionamentoRepository.findById(1L)).thenReturn(Optional.of(estacionamento));
-        when(estacionamentoRepository.save(any(Estacionamento.class))).thenReturn(estacionamento);
+        when(EstacionamentoDao.findById(1L)).thenReturn(Optional.of(estacionamento));
+        when(EstacionamentoDao.save(any(Estacionamento.class))).thenReturn(estacionamento);
 
         estacionamentoService.desativarEstacionamento(1L);
 
-        verify(estacionamentoRepository).save(estacionamento);
+        verify(EstacionamentoDao).save(estacionamento);
         assertFalse(estacionamento.getStatus());
     }
 
     @Test
     void deveLancarExcecaoAoDesativarIdNaoCadastrado() {
-        when(estacionamentoRepository.findById(2L)).thenReturn(Optional.empty());
+        when(EstacionamentoDao.findById(2L)).thenReturn(Optional.empty());
         IdNaoCadastrado ex = assertThrows(IdNaoCadastrado.class, () -> estacionamentoService.desativarEstacionamento(2L));
         assertEquals("O Id do estacionamento fornecido não foi encontrado no sistema!", ex.getMessage());
     }

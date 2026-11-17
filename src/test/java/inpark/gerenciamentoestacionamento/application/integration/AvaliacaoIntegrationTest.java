@@ -4,9 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import inpark.gerenciamentoestacionamento.GerenciamentoEstacionamentoApplication;
 import inpark.gerenciamentoestacionamento.application.dto.requests.AvaliacaoRequest;
 import inpark.gerenciamentoestacionamento.application.dto.response.AvaliacaoResponse;
-import inpark.gerenciamentoestacionamento.infraestructure.repositories.*;
-import inpark.gerenciamentoestacionamento.infraestructure.repositories.usuario.ClienteRepository;
-import inpark.gerenciamentoestacionamento.infraestructure.repositories.usuario.DonoRepository;
+import inpark.gerenciamentoestacionamento.dao.*;
+import inpark.gerenciamentoestacionamento.dao.ClienteDao;
+import inpark.gerenciamentoestacionamento.dao.DonoDao;
 import inpark.gerenciamentoestacionamento.infraestructure.security.JwtService;
 import inpark.gerenciamentoestacionamento.model.entities.Acesso;
 import inpark.gerenciamentoestacionamento.model.entities.Carro;
@@ -47,15 +47,15 @@ public class AvaliacaoIntegrationTest {
 
     @Autowired private MockMvc mockMvc;
     private final ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();
-    @Autowired private ClienteRepository clienteRepository;
-    @Autowired private DonoRepository donoRepository;
-    @Autowired private EstacionamentoRepository estacionamentoRepository;
-    @Autowired private AvaliacaoRepository avaliacaoRepository;
+    @Autowired private ClienteDao ClienteDao;
+    @Autowired private DonoDao DonoDao;
+    @Autowired private EstacionamentoDao EstacionamentoDao;
+    @Autowired private AvaliacaoDao AvaliacaoDao;
     @Autowired private PasswordEncoder passwordEncoder;
     @Autowired private JwtService jwtService;
-    @Autowired private AcessoRepository acessoRepository;
-    @Autowired private CarroRepository carroRepository;
-    @Autowired private ReservaRepository reservaRepository;
+    @Autowired private AcessoDao AcessoDao;
+    @Autowired private CarroDao CarroDao;
+    @Autowired private ReservaDao ReservaDao;
 
     private String clienteToken;
     private Long clienteId;
@@ -63,13 +63,13 @@ public class AvaliacaoIntegrationTest {
 
     @BeforeEach
     void setup() throws Exception {
-        acessoRepository.deleteAll();
-        avaliacaoRepository.deleteAll();
-        reservaRepository.deleteAll();
-        carroRepository.deleteAll();
-        estacionamentoRepository.deleteAll();
-        clienteRepository.deleteAll();
-        donoRepository.deleteAll();
+        AcessoDao.deleteAll();
+        AvaliacaoDao.deleteAll();
+        ReservaDao.deleteAll();
+        CarroDao.deleteAll();
+        EstacionamentoDao.deleteAll();
+        ClienteDao.deleteAll();
+        DonoDao.deleteAll();
 
         Date birthDateDono = Date.from(LocalDate.of(1990, 1, 1)
                 .atStartOfDay(ZoneId.systemDefault()).toInstant());
@@ -85,7 +85,7 @@ public class AvaliacaoIntegrationTest {
                 .status(true)
                 .build();
 
-        donoRepository.save(dono);
+        DonoDao.save(dono);
 
         Estacionamento estacionamento = Estacionamento.builder()
                 .nome("Estacionamento Teste")
@@ -102,7 +102,7 @@ public class AvaliacaoIntegrationTest {
                 .status(true)
                 .build();
 
-        estacionamentoRepository.saveAndFlush(estacionamento);
+        EstacionamentoDao.save(estacionamento);
         estacionamentoId = estacionamento.getId();
 
         Date birthDateCliente = Date.from(LocalDate.of(1995, 5, 5)
@@ -119,7 +119,7 @@ public class AvaliacaoIntegrationTest {
                 .status(true)
                 .build();
 
-        clienteRepository.save(cliente);
+        ClienteDao.save(cliente);
         clienteId = cliente.getId();
         clienteToken = jwtService.generateToken(cliente.getEmail(), cliente.getRole().name());
 
@@ -133,7 +133,7 @@ public class AvaliacaoIntegrationTest {
 
         if (cliente.getCarros() == null) cliente.setCarros(new ArrayList<>());
         cliente.getCarros().add(carro);
-        carro = carroRepository.saveAndFlush(carro);
+        carro = CarroDao.save(carro);
 
         Reserva reserva = Reserva.builder()
                 .cliente(cliente)
@@ -145,7 +145,7 @@ public class AvaliacaoIntegrationTest {
 
         if (cliente.getReservas() == null) cliente.setReservas(new ArrayList<>());
         cliente.getReservas().add(reserva);
-        reservaRepository.saveAndFlush(reserva);
+        ReservaDao.save(reserva);
 
         Acesso acesso = new Acesso();
         acesso.setCarro(carro);
@@ -161,7 +161,7 @@ public class AvaliacaoIntegrationTest {
 
         if (carro.getAcessos() == null) carro.setAcessos(new ArrayList<>());
         carro.getAcessos().add(acesso);
-        acessoRepository.saveAndFlush(acesso);
+        AcessoDao.save(acesso);
     }
 
     private AvaliacaoRequest avaliacaoRequestValida() {

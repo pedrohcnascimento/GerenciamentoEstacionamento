@@ -6,9 +6,9 @@ import inpark.gerenciamentoestacionamento.application.dto.requests.Estacionament
 import inpark.gerenciamentoestacionamento.application.dto.requests.ValorRequest;
 import inpark.gerenciamentoestacionamento.application.dto.response.EstacionamentoResponse;
 import inpark.gerenciamentoestacionamento.application.dto.response.ValorResponse;
-import inpark.gerenciamentoestacionamento.infraestructure.repositories.*;
-import inpark.gerenciamentoestacionamento.infraestructure.repositories.usuario.DonoRepository;
-import inpark.gerenciamentoestacionamento.infraestructure.repositories.usuario.GerenteRepository;
+import inpark.gerenciamentoestacionamento.dao.*;
+import inpark.gerenciamentoestacionamento.dao.DonoDao;
+import inpark.gerenciamentoestacionamento.dao.GerenteDao;
 import inpark.gerenciamentoestacionamento.infraestructure.security.JwtService;
 import inpark.gerenciamentoestacionamento.model.entities.usuarios.DonoEstacionamento;
 import inpark.gerenciamentoestacionamento.model.enums.*;
@@ -39,19 +39,19 @@ public class ValorIntegrationTest {
     private final ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();
 
     @Autowired
-    private AcessoRepository acessoRepository;
+    private AcessoDao AcessoDao;
     @Autowired
-    private AvaliacaoRepository avaliacaoRepository;
+    private AvaliacaoDao AvaliacaoDao;
     @Autowired
-    private ReservaRepository reservaRepository;
+    private ReservaDao ReservaDao;
     @Autowired
-    private GerenteRepository gerenteRepository;
+    private GerenteDao GerenteDao;
     @Autowired
-    private ValorRepository valorRepository;
+    private ValorDao ValorDao;
     @Autowired
-    private DonoRepository donoRepository;
+    private DonoDao DonoDao;
     @Autowired
-    private EstacionamentoRepository estacionamentoRepository;
+    private EstacionamentoDao EstacionamentoDao;
     @Autowired
     private PasswordEncoder passwordEncoder;
     @Autowired
@@ -62,13 +62,13 @@ public class ValorIntegrationTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        acessoRepository.deleteAll();
-        avaliacaoRepository.deleteAll();
-        reservaRepository.deleteAll();
-        valorRepository.deleteAll();
-        gerenteRepository.deleteAll();
-        estacionamentoRepository.deleteAll();
-        donoRepository.deleteAll();
+        AcessoDao.deleteAll();
+        AvaliacaoDao.deleteAll();
+        ReservaDao.deleteAll();
+        ValorDao.deleteAll();
+        GerenteDao.deleteAll();
+        EstacionamentoDao.deleteAll();
+        DonoDao.deleteAll();
 
         Date birthDate = Date.from(LocalDate.of(2000, 9, 12)
                 .atStartOfDay(ZoneId.systemDefault()).toInstant());
@@ -85,7 +85,7 @@ public class ValorIntegrationTest {
                 .status(true)
                 .build();
 
-        donoRepository.save(dono);
+        DonoDao.save(dono);
 
         token = jwtService.generateToken(dono.getEmail(), dono.getRole().name());
 

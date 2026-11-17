@@ -4,11 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import inpark.gerenciamentoestacionamento.GerenciamentoEstacionamentoApplication;
 import inpark.gerenciamentoestacionamento.application.dto.requests.usuario.ClienteRequest;
 import inpark.gerenciamentoestacionamento.application.dto.response.usuario.ClienteResponse;
-import inpark.gerenciamentoestacionamento.infraestructure.repositories.AcessoRepository;
-import inpark.gerenciamentoestacionamento.infraestructure.repositories.AvaliacaoRepository;
-import inpark.gerenciamentoestacionamento.infraestructure.repositories.CarroRepository;
-import inpark.gerenciamentoestacionamento.infraestructure.repositories.ReservaRepository;
-import inpark.gerenciamentoestacionamento.infraestructure.repositories.usuario.ClienteRepository;
+import inpark.gerenciamentoestacionamento.dao.AcessoDao;
+import inpark.gerenciamentoestacionamento.dao.AvaliacaoDao;
+import inpark.gerenciamentoestacionamento.dao.CarroDao;
+import inpark.gerenciamentoestacionamento.dao.ReservaDao;
+import inpark.gerenciamentoestacionamento.dao.ClienteDao;
 import inpark.gerenciamentoestacionamento.infraestructure.security.JwtService;
 import inpark.gerenciamentoestacionamento.model.entities.usuarios.Cliente;
 import inpark.gerenciamentoestacionamento.model.enums.Role;
@@ -40,15 +40,15 @@ public class ClienteIntegrationTest {
     private final ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();
 
     @Autowired
-    private AcessoRepository acessoRepository;
+    private AcessoDao AcessoDao;
     @Autowired
-    private AvaliacaoRepository avaliacaoRepository;
+    private AvaliacaoDao AvaliacaoDao;
     @Autowired
-    private ReservaRepository reservaRepository;
+    private ReservaDao ReservaDao;
     @Autowired
-    private CarroRepository carroRepository;
+    private CarroDao CarroDao;
     @Autowired
-    private ClienteRepository clienteRepository;
+    private ClienteDao ClienteDao;
     @Autowired
     private PasswordEncoder passwordEncoder;
     @Autowired
@@ -59,11 +59,11 @@ public class ClienteIntegrationTest {
 
     @BeforeEach
     void setup() {
-        acessoRepository.deleteAll();
-        avaliacaoRepository.deleteAll();
-        reservaRepository.deleteAll();
-        carroRepository.deleteAll();
-        clienteRepository.deleteAll();
+        AcessoDao.deleteAll();
+        AvaliacaoDao.deleteAll();
+        ReservaDao.deleteAll();
+        CarroDao.deleteAll();
+        ClienteDao.deleteAll();
 
         Date birthDate = Date.from(LocalDate.of(1990, 1, 1)
                 .atStartOfDay(ZoneId.systemDefault()).toInstant());
@@ -79,7 +79,7 @@ public class ClienteIntegrationTest {
                 .status(true)
                 .build();
 
-        clienteRepository.save(cliente);
+        ClienteDao.save(cliente);
 
         testClienteRequest = new ClienteRequest(
                 "Pedro",

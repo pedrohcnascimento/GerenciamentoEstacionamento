@@ -5,8 +5,8 @@ import inpark.gerenciamentoestacionamento.application.dto.requests.usuario.Geren
 import inpark.gerenciamentoestacionamento.application.dto.response.usuario.GerenteResponse;
 import inpark.gerenciamentoestacionamento.application.mappers.usuario.GerenteMapper;
 import inpark.gerenciamentoestacionamento.application.services.usuario.GerenteService;
-import inpark.gerenciamentoestacionamento.infraestructure.repositories.EstacionamentoRepository;
-import inpark.gerenciamentoestacionamento.infraestructure.repositories.usuario.GerenteRepository;
+import inpark.gerenciamentoestacionamento.dao.EstacionamentoDao;
+import inpark.gerenciamentoestacionamento.dao.GerenteDao;
 import inpark.gerenciamentoestacionamento.model.entities.Estacionamento;
 import inpark.gerenciamentoestacionamento.model.entities.usuarios.DonoEstacionamento;
 import inpark.gerenciamentoestacionamento.model.entities.usuarios.Gerente;
@@ -32,9 +32,9 @@ import static org.mockito.Mockito.*;
 public class GerenteServiceTest {
 
     @Mock
-    private GerenteRepository repository;
+    private GerenteDao repository;
     @Mock
-    private EstacionamentoRepository estacionamentoRepository;
+    private EstacionamentoDao EstacionamentoDao;
     @Mock
     private PasswordEncoder passwordEncoder;
     @InjectMocks
@@ -86,7 +86,7 @@ public class GerenteServiceTest {
         dono.setEstacionamentos(new ArrayList<>());
         dono.getEstacionamentos().add(estacionamento);
         estacionamento.setDono(dono);
-        estacionamentoRepository.save(estacionamento);
+        EstacionamentoDao.save(estacionamento);
         dto = new GerenteRequest(
                 "Pedro",
                 "pedro@gmail.com",
@@ -99,7 +99,7 @@ public class GerenteServiceTest {
 
     @Test
     void deveCadastrarGerenteValido() {
-        when(estacionamentoRepository.findById(1L)).thenReturn(Optional.of(estacionamento));
+        when(EstacionamentoDao.findById(1L)).thenReturn(Optional.of(estacionamento));
 
         when(repository.save(any())).thenAnswer(invocation -> {
             Gerente g = invocation.getArgument(0);
@@ -118,7 +118,7 @@ public class GerenteServiceTest {
 
     @Test
     void deveLancarExcecaoAoCadastrarComEstacionamentoInexistente() {
-        when(estacionamentoRepository.findById(99L)).thenReturn(Optional.empty());
+        when(EstacionamentoDao.findById(99L)).thenReturn(Optional.empty());
         GerenteRequest dtoInvalido = new GerenteRequest(
                 "Pedro",
                 "pedro@gmail.com",
@@ -167,7 +167,7 @@ public class GerenteServiceTest {
         );
 
         when(repository.findById(1L)).thenReturn(Optional.of(entidade));
-        when(estacionamentoRepository.findById(1L)).thenReturn(Optional.of(estacionamento));
+        when(EstacionamentoDao.findById(1L)).thenReturn(Optional.of(estacionamento));
         when(repository.save(any())).thenAnswer(invocation -> {
             Gerente g = invocation.getArgument(0);
             g.setId(1L);
@@ -196,7 +196,7 @@ public class GerenteServiceTest {
         entidade.setEstacionamento(estacionamento);
 
         when(repository.findById(1L)).thenReturn(Optional.of(entidade));
-        when(estacionamentoRepository.findById(1L)).thenReturn(Optional.empty());
+        when(EstacionamentoDao.findById(1L)).thenReturn(Optional.empty());
 
         IdNaoCadastrado ex = assertThrows(IdNaoCadastrado.class,
                 () -> service.atualizarGerente(dto, 1L));

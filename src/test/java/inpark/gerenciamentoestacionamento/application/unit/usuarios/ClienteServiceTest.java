@@ -4,7 +4,7 @@ import inpark.gerenciamentoestacionamento.application.dto.requests.usuario.Clien
 import inpark.gerenciamentoestacionamento.application.dto.response.usuario.ClienteResponse;
 import inpark.gerenciamentoestacionamento.application.mappers.usuario.ClienteMapper;
 import inpark.gerenciamentoestacionamento.application.services.usuario.ClienteService;
-import inpark.gerenciamentoestacionamento.infraestructure.repositories.usuario.ClienteRepository;
+import inpark.gerenciamentoestacionamento.dao.ClienteDao;
 import inpark.gerenciamentoestacionamento.model.entities.usuarios.Cliente;
 import inpark.gerenciamentoestacionamento.model.exceptions.IdNaoCadastrado;
 import org.junit.jupiter.api.Test;
@@ -26,7 +26,7 @@ import static org.mockito.Mockito.when;
 public class ClienteServiceTest {
 
     @Mock
-    private ClienteRepository repository;
+    private ClienteDao repository;
     @InjectMocks
     private ClienteService service;
     @Mock

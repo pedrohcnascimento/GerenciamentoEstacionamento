@@ -1,6 +1,6 @@
 package inpark.gerenciamentoestacionamento.application.unit.security;
 
-import inpark.gerenciamentoestacionamento.infraestructure.repositories.usuario.UsuarioRepository;
+import inpark.gerenciamentoestacionamento.dao.UsuarioDao;
 import inpark.gerenciamentoestacionamento.infraestructure.security.UsuarioDetailService;
 import inpark.gerenciamentoestacionamento.model.entities.usuarios.DonoEstacionamento;
 import inpark.gerenciamentoestacionamento.model.entities.usuarios.Usuario;
@@ -22,7 +22,7 @@ import static org.mockito.Mockito.when;
 class UsuarioDetailsServiceTest {
 
     @Mock
-    private UsuarioRepository repository;
+    private UsuarioDao repository;
 
     @InjectMocks
     private UsuarioDetailService service;

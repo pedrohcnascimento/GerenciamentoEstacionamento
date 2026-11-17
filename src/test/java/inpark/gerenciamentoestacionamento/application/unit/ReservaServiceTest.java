@@ -3,9 +3,9 @@ package inpark.gerenciamentoestacionamento.application.unit;
 import inpark.gerenciamentoestacionamento.application.dto.requests.ReservaRequest;
 import inpark.gerenciamentoestacionamento.application.dto.response.ReservaResponse;
 import inpark.gerenciamentoestacionamento.application.services.ReservaService;
-import inpark.gerenciamentoestacionamento.infraestructure.repositories.EstacionamentoRepository;
-import inpark.gerenciamentoestacionamento.infraestructure.repositories.ReservaRepository;
-import inpark.gerenciamentoestacionamento.infraestructure.repositories.usuario.ClienteRepository;
+import inpark.gerenciamentoestacionamento.dao.EstacionamentoDao;
+import inpark.gerenciamentoestacionamento.dao.ReservaDao;
+import inpark.gerenciamentoestacionamento.dao.ClienteDao;
 import inpark.gerenciamentoestacionamento.model.entities.Estacionamento;
 import inpark.gerenciamentoestacionamento.model.entities.Reserva;
 import inpark.gerenciamentoestacionamento.model.entities.usuarios.Cliente;
@@ -32,11 +32,11 @@ import static org.mockito.Mockito.*;
 public class ReservaServiceTest {
 
     @Mock
-    private ReservaRepository reservaRepository;
+    private ReservaDao ReservaDao;
     @Mock
-    private EstacionamentoRepository estacionamentoRepository;
+    private EstacionamentoDao EstacionamentoDao;
     @Mock
-    private ClienteRepository clienteRepository;
+    private ClienteDao ClienteDao;
     @InjectMocks
     private ReservaService reservaService;
 
@@ -78,44 +78,44 @@ public class ReservaServiceTest {
 
     @Test
     void deveListarReservas() {
-        when(reservaRepository.findByStatusTrue()).thenReturn(List.of(reserva));
+        when(ReservaDao.findByStatusTrue()).thenReturn(List.of(reserva));
         List<ReservaResponse> lista = reservaService.listarReservas();
         assertEquals(1, lista.size());
         assertEquals(1L, lista.get(0).id());
-        verify(reservaRepository).findByStatusTrue();
+        verify(ReservaDao).findByStatusTrue();
     }
 
     @Test
     void deveBuscarReservaPorId() {
-        when(reservaRepository.findById(1L)).thenReturn(Optional.of(reserva));
+        when(ReservaDao.findById(1L)).thenReturn(Optional.of(reserva));
         ReservaResponse response = reservaService.buscarPorId(1L);
         assertEquals(1L, response.id());
-        verify(reservaRepository).findById(1L);
+        verify(ReservaDao).findById(1L);
     }
 
     @Test
     void deveLancarExcecaoAoBuscarIdNaoCadastrado() {
-        when(reservaRepository.findById(2L)).thenReturn(Optional.empty());
+        when(ReservaDao.findById(2L)).thenReturn(Optional.empty());
         IdNaoCadastrado ex = assertThrows(IdNaoCadastrado.class, () -> reservaService.buscarPorId(2L));
         assertEquals("ID buscado não foi encontrado no sistema!", ex.getMessage());
     }
 
     @Test
     void deveCadastrarReserva() {
-        when(clienteRepository.findById(1L)).thenReturn(Optional.of(cliente));
-        when(estacionamentoRepository.findById(1L)).thenReturn(Optional.of(estacionamento));
-        when(reservaRepository.save(any(Reserva.class))).thenReturn(reserva);
+        when(ClienteDao.findById(1L)).thenReturn(Optional.of(cliente));
+        when(EstacionamentoDao.findById(1L)).thenReturn(Optional.of(estacionamento));
+        when(ReservaDao.save(any(Reserva.class))).thenReturn(reserva);
 
         ReservaResponse response = reservaService.cadastrarReserva(reservaRequest);
         assertEquals(1L, response.id());
         assertTrue(response.status());
-        verify(reservaRepository).save(any(Reserva.class));
+        verify(ReservaDao).save(any(Reserva.class));
     }
 
     @Test
     void deveLancarExcecaoAoCadastrarComClienteOuEstacionamentoInexistente() {
-        when(clienteRepository.findById(2L)).thenReturn(Optional.empty());
-        when(estacionamentoRepository.findById(1L)).thenReturn(Optional.of(estacionamento));
+        when(ClienteDao.findById(2L)).thenReturn(Optional.empty());
+        when(EstacionamentoDao.findById(1L)).thenReturn(Optional.of(estacionamento));
         ReservaRequest req = new ReservaRequest(2L, 1L, new Date(), Time.valueOf("14:30:00"), StatusReserva.PENDENTE);
         IdNaoCadastrado ex = assertThrows(IdNaoCadastrado.class, () -> reservaService.cadastrarReserva(req));
         assertEquals("Cliente ou estacionameno não encontrado no sistema!", ex.getMessage());
@@ -123,19 +123,19 @@ public class ReservaServiceTest {
 
     @Test
     void deveAtualizarReserva() {
-        when(reservaRepository.findById(1L)).thenReturn(Optional.of(reserva));
-        when(reservaRepository.save(any(Reserva.class))).thenReturn(reserva);
+        when(ReservaDao.findById(1L)).thenReturn(Optional.of(reserva));
+        when(ReservaDao.save(any(Reserva.class))).thenReturn(reserva);
 
         ReservaRequest req = new ReservaRequest(1L, 1L, new Date(), Time.valueOf("15:00:00"), StatusReserva.ACEITA);
         ReservaResponse response = reservaService.atualizarReserva(req, 1L);
         assertEquals(StatusReserva.ACEITA, response.statusReserva());
         assertEquals(Time.valueOf("15:00:00"), response.horaDaReserva());
-        verify(reservaRepository).save(any(Reserva.class));
+        verify(ReservaDao).save(any(Reserva.class));
     }
 
     @Test
     void deveLancarExcecaoAoAtualizarReservaInexistente() {
-        when(reservaRepository.findById(2L)).thenReturn(Optional.empty());
+        when(ReservaDao.findById(2L)).thenReturn(Optional.empty());
         ReservaRequest req = new ReservaRequest(1L, 1L, new Date(), Time.valueOf("15:00:00"), StatusReserva.ACEITA);
         IdNaoCadastrado ex = assertThrows(IdNaoCadastrado.class, () -> reservaService.atualizarReserva(req, 2L));
         assertEquals("ID de reserva buscado não encontrado no sistema!", ex.getMessage());
@@ -146,20 +146,20 @@ public class ReservaServiceTest {
         cliente.getReservas().add(reserva);
         estacionamento.getReservas().add(reserva);
 
-        when(reservaRepository.findById(1L)).thenReturn(Optional.of(reserva));
-        when(reservaRepository.save(any(Reserva.class))).thenReturn(reserva);
+        when(ReservaDao.findById(1L)).thenReturn(Optional.of(reserva));
+        when(ReservaDao.save(any(Reserva.class))).thenReturn(reserva);
 
         reservaService.deletarReserva(1L);
 
         assertFalse(reserva.getStatus());
         assertFalse(cliente.getReservas().contains(reserva));
         assertFalse(estacionamento.getReservas().contains(reserva));
-        verify(reservaRepository).save(reserva);
+        verify(ReservaDao).save(reserva);
     }
 
     @Test
     void deveLancarExcecaoAoDeletarReservaInexistente() {
-        when(reservaRepository.findById(2L)).thenReturn(Optional.empty());
+        when(ReservaDao.findById(2L)).thenReturn(Optional.empty());
         IdNaoCadastrado ex = assertThrows(IdNaoCadastrado.class, () -> reservaService.deletarReserva(2L));
         assertEquals("ID de reserva buscado não encontrado no sistema!", ex.getMessage());
     }

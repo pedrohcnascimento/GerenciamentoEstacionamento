@@ -6,10 +6,10 @@ import inpark.gerenciamentoestacionamento.application.dto.requests.Estacionament
 import inpark.gerenciamentoestacionamento.application.dto.requests.ReservaRequest;
 import inpark.gerenciamentoestacionamento.application.dto.response.EstacionamentoResponse;
 import inpark.gerenciamentoestacionamento.application.dto.response.ReservaResponse;
-import inpark.gerenciamentoestacionamento.infraestructure.repositories.*;
-import inpark.gerenciamentoestacionamento.infraestructure.repositories.usuario.ClienteRepository;
-import inpark.gerenciamentoestacionamento.infraestructure.repositories.usuario.DonoRepository;
-import inpark.gerenciamentoestacionamento.infraestructure.repositories.usuario.GerenteRepository;
+import inpark.gerenciamentoestacionamento.dao.*;
+import inpark.gerenciamentoestacionamento.dao.ClienteDao;
+import inpark.gerenciamentoestacionamento.dao.DonoDao;
+import inpark.gerenciamentoestacionamento.dao.GerenteDao;
 import inpark.gerenciamentoestacionamento.infraestructure.security.JwtService;
 import inpark.gerenciamentoestacionamento.model.entities.usuarios.Cliente;
 import inpark.gerenciamentoestacionamento.model.entities.usuarios.DonoEstacionamento;
@@ -45,23 +45,23 @@ public class ReservaIntegrationTest {
     private final ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();
 
     @Autowired
-    private AcessoRepository acessoRepository;
+    private AcessoDao AcessoDao;
     @Autowired
-    private AvaliacaoRepository avaliacaoRepository;
+    private AvaliacaoDao AvaliacaoDao;
     @Autowired
-    private ValorRepository valorRepository;
+    private ValorDao ValorDao;
     @Autowired
-    private GerenteRepository gerenteRepository;
+    private GerenteDao GerenteDao;
     @Autowired
-    private CarroRepository carroRepository;
+    private CarroDao CarroDao;
     @Autowired
-    private ClienteRepository clienteRepository;
+    private ClienteDao ClienteDao;
     @Autowired
-    private DonoRepository donoRepository;
+    private DonoDao DonoDao;
     @Autowired
-    private EstacionamentoRepository estacionamentoRepository;
+    private EstacionamentoDao EstacionamentoDao;
     @Autowired
-    private ReservaRepository reservaRepository;
+    private ReservaDao ReservaDao;
     @Autowired
     private PasswordEncoder passwordEncoder;
     @Autowired
@@ -73,15 +73,15 @@ public class ReservaIntegrationTest {
 
     @BeforeEach
     void setup() throws Exception {
-        acessoRepository.deleteAll();
-        avaliacaoRepository.deleteAll();
-        reservaRepository.deleteAll();
-        valorRepository.deleteAll();
-        gerenteRepository.deleteAll();
-        carroRepository.deleteAll();
-        estacionamentoRepository.deleteAll();
-        clienteRepository.deleteAll();
-        donoRepository.deleteAll();
+        AcessoDao.deleteAll();
+        AvaliacaoDao.deleteAll();
+        ReservaDao.deleteAll();
+        ValorDao.deleteAll();
+        GerenteDao.deleteAll();
+        CarroDao.deleteAll();
+        EstacionamentoDao.deleteAll();
+        ClienteDao.deleteAll();
+        DonoDao.deleteAll();
 
         Date birthDateDono = Date.from(LocalDate.of(1990, 1, 1)
                 .atStartOfDay(ZoneId.systemDefault()).toInstant());
@@ -97,7 +97,7 @@ public class ReservaIntegrationTest {
                 .status(true)
                 .build();
 
-        donoRepository.save(dono);
+        DonoDao.save(dono);
 
         var estacionamentoRequest = new EstacionamentoRequest(
                 "Estacionamento Central",
@@ -138,7 +138,7 @@ public class ReservaIntegrationTest {
                 .status(true)
                 .build();
 
-        clienteRepository.save(cliente);
+        ClienteDao.save(cliente);
         clienteId = cliente.getId();
         clienteToken = jwtService.generateToken(cliente.getEmail(), cliente.getRole().name());
     }

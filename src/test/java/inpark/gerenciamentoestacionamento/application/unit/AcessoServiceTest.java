@@ -3,9 +3,9 @@ package inpark.gerenciamentoestacionamento.application.unit;
 import inpark.gerenciamentoestacionamento.application.dto.requests.AcessoRequest;
 import inpark.gerenciamentoestacionamento.application.dto.response.AcessoResponse;
 import inpark.gerenciamentoestacionamento.application.services.AcessoService;
-import inpark.gerenciamentoestacionamento.infraestructure.repositories.AcessoRepository;
-import inpark.gerenciamentoestacionamento.infraestructure.repositories.CarroRepository;
-import inpark.gerenciamentoestacionamento.infraestructure.repositories.EstacionamentoRepository;
+import inpark.gerenciamentoestacionamento.dao.AcessoDao;
+import inpark.gerenciamentoestacionamento.dao.CarroDao;
+import inpark.gerenciamentoestacionamento.dao.EstacionamentoDao;
 import inpark.gerenciamentoestacionamento.model.entities.Acesso;
 import inpark.gerenciamentoestacionamento.model.entities.Estacionamento;
 import inpark.gerenciamentoestacionamento.model.exceptions.IdNaoCadastrado;
@@ -29,11 +29,11 @@ import static org.mockito.Mockito.*;
 public class AcessoServiceTest {
 
     @Mock
-    private AcessoRepository acessoRepository;
+    private AcessoDao AcessoDao;
     @Mock
-    private EstacionamentoRepository estacionamentoRepository;
+    private EstacionamentoDao EstacionamentoDao;
     @Mock
-    private CarroRepository carroRepository;
+    private CarroDao CarroDao;
     @InjectMocks
     private AcessoService acessoService;
 
@@ -68,42 +68,42 @@ public class AcessoServiceTest {
 
     @Test
     void deveListarAcessos() {
-        when(acessoRepository.findByStatusTrue()).thenReturn(List.of(acesso));
+        when(AcessoDao.findByStatusTrue()).thenReturn(List.of(acesso));
         List<AcessoResponse> lista = acessoService.listarAcessos();
         assertEquals(1, lista.size());
         assertEquals("ABC1234", lista.get(0).placaDoCarro());
-        verify(acessoRepository).findByStatusTrue();
+        verify(AcessoDao).findByStatusTrue();
     }
 
     @Test
     void deveBuscarAcessoPorId() {
-        when(acessoRepository.findById(1L)).thenReturn(Optional.of(acesso));
+        when(AcessoDao.findById(1L)).thenReturn(Optional.of(acesso));
         AcessoResponse response = acessoService.buscarPorId(1L);
         assertEquals("ABC1234", response.placaDoCarro());
-        verify(acessoRepository).findById(1L);
+        verify(AcessoDao).findById(1L);
     }
 
     @Test
     void deveLancarExcecaoAoBuscarIdNaoCadastrado() {
-        when(acessoRepository.findById(2L)).thenReturn(Optional.empty());
+        when(AcessoDao.findById(2L)).thenReturn(Optional.empty());
         IdNaoCadastrado ex = assertThrows(IdNaoCadastrado.class, () -> acessoService.buscarPorId(2L));
         assertEquals("ID buscado não foi encontrado no sistema!", ex.getMessage());
     }
 
     @Test
     void deveCadastrarAcesso() {
-        when(estacionamentoRepository.findById(1L)).thenReturn(Optional.of(estacionamento));
-        when(acessoRepository.save(any(Acesso.class))).thenReturn(acesso);
+        when(EstacionamentoDao.findById(1L)).thenReturn(Optional.of(estacionamento));
+        when(AcessoDao.save(any(Acesso.class))).thenReturn(acesso);
 
         AcessoResponse response = acessoService.cadastrarAcesso(acessoRequest);
         assertEquals("ABC1234", response.placaDoCarro());
         assertTrue(response.status());
-        verify(acessoRepository).save(any(Acesso.class));
+        verify(AcessoDao).save(any(Acesso.class));
     }
 
     @Test
     void deveLancarExcecaoAoCadastrarComEstacionamentoInexistente() {
-        when(estacionamentoRepository.findById(2L)).thenReturn(Optional.empty());
+        when(EstacionamentoDao.findById(2L)).thenReturn(Optional.empty());
         AcessoRequest req = new AcessoRequest(
                 1L, "ABC1234", LocalTime.parse("08:00:00"), LocalTime.parse("10:00:00"), 20.0, 2L
         );
@@ -113,19 +113,19 @@ public class AcessoServiceTest {
 
     @Test
     void deveAtualizarAcesso() {
-        when(acessoRepository.findById(1L)).thenReturn(Optional.of(acesso));
-        when(estacionamentoRepository.findById(1L)).thenReturn(Optional.of(estacionamento));
-        when(acessoRepository.save(any(Acesso.class))).thenReturn(acesso);
+        when(AcessoDao.findById(1L)).thenReturn(Optional.of(acesso));
+        when(EstacionamentoDao.findById(1L)).thenReturn(Optional.of(estacionamento));
+        when(AcessoDao.save(any(Acesso.class))).thenReturn(acesso);
 
         AcessoResponse response = acessoService.atualizarAcesso(acessoRequest, 1L);
         assertEquals("ABC1234", response.placaDoCarro());
-        verify(acessoRepository).save(any(Acesso.class));
+        verify(AcessoDao).save(any(Acesso.class));
     }
 
     @Test
     void deveLancarExcecaoAoAtualizarAcessoOuEstacionamentoInexistente() {
-        when(acessoRepository.findById(2L)).thenReturn(Optional.empty());
-        when(estacionamentoRepository.findById(1L)).thenReturn(Optional.of(estacionamento));
+        when(AcessoDao.findById(2L)).thenReturn(Optional.empty());
+        when(EstacionamentoDao.findById(1L)).thenReturn(Optional.of(estacionamento));
         IdNaoCadastrado ex = assertThrows(IdNaoCadastrado.class, () -> acessoService.atualizarAcesso(acessoRequest, 2L));
         assertEquals("O Acesso ou estacionamento buscado não existe no sistema", ex.getMessage());
     }
@@ -133,19 +133,19 @@ public class AcessoServiceTest {
     @Test
     void deveDeletarAcesso() {
         estacionamento.getAcessos().add(acesso);
-        when(acessoRepository.findById(1L)).thenReturn(Optional.of(acesso));
-        when(acessoRepository.save(any(Acesso.class))).thenReturn(acesso);
+        when(AcessoDao.findById(1L)).thenReturn(Optional.of(acesso));
+        when(AcessoDao.save(any(Acesso.class))).thenReturn(acesso);
 
         acessoService.deletarAcesso(1L);
 
         assertFalse(acesso.getStatus());
         assertFalse(estacionamento.getAcessos().contains(acesso));
-        verify(acessoRepository).save(acesso);
+        verify(AcessoDao).save(acesso);
     }
 
     @Test
     void deveLancarExcecaoAoDeletarAcessoInexistente() {
-        when(acessoRepository.findById(2L)).thenReturn(Optional.empty());
+        when(AcessoDao.findById(2L)).thenReturn(Optional.empty());
         IdNaoCadastrado ex = assertThrows(IdNaoCadastrado.class, () -> acessoService.deletarAcesso(2L));
         assertEquals("Acesso buscado não cadastrado no sistema", ex.getMessage());
     }

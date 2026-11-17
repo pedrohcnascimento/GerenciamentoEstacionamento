@@ -6,9 +6,9 @@ import inpark.gerenciamentoestacionamento.application.dto.requests.Estacionament
 import inpark.gerenciamentoestacionamento.application.dto.requests.usuario.GerenteRequest;
 import inpark.gerenciamentoestacionamento.application.dto.response.usuario.GerenteResponse;
 import inpark.gerenciamentoestacionamento.application.services.EstacionamentoService;
-import inpark.gerenciamentoestacionamento.infraestructure.repositories.*;
-import inpark.gerenciamentoestacionamento.infraestructure.repositories.usuario.DonoRepository;
-import inpark.gerenciamentoestacionamento.infraestructure.repositories.usuario.GerenteRepository;
+import inpark.gerenciamentoestacionamento.dao.*;
+import inpark.gerenciamentoestacionamento.dao.DonoDao;
+import inpark.gerenciamentoestacionamento.dao.GerenteDao;
 import inpark.gerenciamentoestacionamento.infraestructure.security.JwtService;
 import inpark.gerenciamentoestacionamento.model.entities.usuarios.DonoEstacionamento;
 import inpark.gerenciamentoestacionamento.model.enums.Role;
@@ -40,19 +40,19 @@ public class GerenteIntegrationTest {
     private final ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();
 
     @Autowired
-    private AcessoRepository acessoRepository;
+    private AcessoDao AcessoDao;
     @Autowired
-    private AvaliacaoRepository avaliacaoRepository;
+    private AvaliacaoDao AvaliacaoDao;
     @Autowired
-    private ReservaRepository reservaRepository;
+    private ReservaDao ReservaDao;
     @Autowired
-    private ValorRepository valorRepository;
+    private ValorDao ValorDao;
     @Autowired
-    private GerenteRepository gerenteRepository;
+    private GerenteDao GerenteDao;
     @Autowired
-    private DonoRepository donoRepository;
+    private DonoDao DonoDao;
     @Autowired
-    private EstacionamentoRepository estacionamentoRepository;
+    private EstacionamentoDao EstacionamentoDao;
     @Autowired
     private EstacionamentoService estacionamentoService;
     @Autowired
@@ -66,13 +66,13 @@ public class GerenteIntegrationTest {
 
     @BeforeEach
     void setup() {
-        acessoRepository.deleteAll();
-        avaliacaoRepository.deleteAll();
-        reservaRepository.deleteAll();
-        valorRepository.deleteAll();
-        gerenteRepository.deleteAll();
-        estacionamentoRepository.deleteAll();
-        donoRepository.deleteAll();
+        AcessoDao.deleteAll();
+        AvaliacaoDao.deleteAll();
+        ReservaDao.deleteAll();
+        ValorDao.deleteAll();
+        GerenteDao.deleteAll();
+        EstacionamentoDao.deleteAll();
+        DonoDao.deleteAll();
 
         DonoEstacionamento dono = DonoEstacionamento.builder()
                 .nome("Dono Teste")
@@ -84,7 +84,7 @@ public class GerenteIntegrationTest {
                 .status(true)
                 .build();
 
-        dono = donoRepository.save(dono);
+        dono = DonoDao.save(dono);
 
         var estacionamentoDto = new EstacionamentoRequest(
                 "EstacioPlay",

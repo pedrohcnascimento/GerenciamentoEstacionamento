@@ -2,7 +2,7 @@ package inpark.gerenciamentoestacionamento.application.unit.security;
 
 import inpark.gerenciamentoestacionamento.application.dto.requests.login.UsuarioLoginRequest;
 import inpark.gerenciamentoestacionamento.application.services.AuthService;
-import inpark.gerenciamentoestacionamento.infraestructure.repositories.usuario.UsuarioRepository;
+import inpark.gerenciamentoestacionamento.dao.UsuarioDao;
 import inpark.gerenciamentoestacionamento.infraestructure.security.JwtService;
 import inpark.gerenciamentoestacionamento.model.entities.usuarios.DonoEstacionamento;
 import inpark.gerenciamentoestacionamento.model.entities.usuarios.Usuario;
@@ -25,7 +25,7 @@ import static org.mockito.Mockito.when;
 public class AuthServiceTest {
 
     @Mock
-    private UsuarioRepository usuarios;
+    private UsuarioDao usuarios;
 
     @Mock
     private PasswordEncoder encoder;

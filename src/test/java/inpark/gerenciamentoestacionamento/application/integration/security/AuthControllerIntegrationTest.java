@@ -3,9 +3,9 @@ package inpark.gerenciamentoestacionamento.application.integration.security;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import inpark.gerenciamentoestacionamento.GerenciamentoEstacionamentoApplication;
 import inpark.gerenciamentoestacionamento.application.dto.requests.login.UsuarioLoginRequest;
-import inpark.gerenciamentoestacionamento.infraestructure.repositories.*;
-import inpark.gerenciamentoestacionamento.infraestructure.repositories.usuario.GerenteRepository;
-import inpark.gerenciamentoestacionamento.infraestructure.repositories.usuario.UsuarioRepository;
+import inpark.gerenciamentoestacionamento.dao.*;
+import inpark.gerenciamentoestacionamento.dao.GerenteDao;
+import inpark.gerenciamentoestacionamento.dao.UsuarioDao;
 import inpark.gerenciamentoestacionamento.model.entities.usuarios.DonoEstacionamento;
 import inpark.gerenciamentoestacionamento.model.enums.Role;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,33 +32,33 @@ class AuthControllerIntegrationTest {
     private MockMvc mockMvc;
     private final ObjectMapper mapper = new ObjectMapper().findAndRegisterModules();
     @Autowired
-    private AcessoRepository acessoRepository;
+    private AcessoDao AcessoDao;
     @Autowired
-    private AvaliacaoRepository avaliacaoRepository;
+    private AvaliacaoDao AvaliacaoDao;
     @Autowired
-    private ReservaRepository reservaRepository;
+    private ReservaDao ReservaDao;
     @Autowired
-    private ValorRepository valorRepository;
+    private ValorDao ValorDao;
     @Autowired
-    private GerenteRepository gerenteRepository;
+    private GerenteDao GerenteDao;
     @Autowired
-    private CarroRepository carroRepository;
+    private CarroDao CarroDao;
     @Autowired
-    private UsuarioRepository usuarios;
+    private UsuarioDao usuarios;
     @Autowired
-    private EstacionamentoRepository estacionamentoRepository;
+    private EstacionamentoDao EstacionamentoDao;
     @Autowired
     private PasswordEncoder encoder;
 
     @BeforeEach
     void setup() {
-        acessoRepository.deleteAll();
-        avaliacaoRepository.deleteAll();
-        reservaRepository.deleteAll();
-        valorRepository.deleteAll();
-        gerenteRepository.deleteAll();
-        carroRepository.deleteAll();
-        estacionamentoRepository.deleteAll();
+        AcessoDao.deleteAll();
+        AvaliacaoDao.deleteAll();
+        ReservaDao.deleteAll();
+        ValorDao.deleteAll();
+        GerenteDao.deleteAll();
+        CarroDao.deleteAll();
+        EstacionamentoDao.deleteAll();
         usuarios.deleteAll();
         LocalDate localDate = LocalDate.of(1990, 1, 1);
         Date dataNascimento = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());

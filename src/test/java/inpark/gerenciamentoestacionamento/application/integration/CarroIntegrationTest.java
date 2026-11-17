@@ -4,11 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import inpark.gerenciamentoestacionamento.GerenciamentoEstacionamentoApplication;
 import inpark.gerenciamentoestacionamento.application.dto.requests.CarroRequest;
 import inpark.gerenciamentoestacionamento.application.dto.response.CarroResponse;
-import inpark.gerenciamentoestacionamento.infraestructure.repositories.AcessoRepository;
-import inpark.gerenciamentoestacionamento.infraestructure.repositories.AvaliacaoRepository;
-import inpark.gerenciamentoestacionamento.infraestructure.repositories.CarroRepository;
-import inpark.gerenciamentoestacionamento.infraestructure.repositories.ReservaRepository;
-import inpark.gerenciamentoestacionamento.infraestructure.repositories.usuario.ClienteRepository;
+import inpark.gerenciamentoestacionamento.dao.AcessoDao;
+import inpark.gerenciamentoestacionamento.dao.AvaliacaoDao;
+import inpark.gerenciamentoestacionamento.dao.CarroDao;
+import inpark.gerenciamentoestacionamento.dao.ReservaDao;
+import inpark.gerenciamentoestacionamento.dao.ClienteDao;
 import inpark.gerenciamentoestacionamento.infraestructure.security.JwtService;
 import inpark.gerenciamentoestacionamento.model.entities.usuarios.Cliente;
 import inpark.gerenciamentoestacionamento.model.enums.Role;
@@ -39,15 +39,15 @@ public class CarroIntegrationTest {
     private final ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();
 
     @Autowired
-    private AcessoRepository acessoRepository;
+    private AcessoDao AcessoDao;
     @Autowired
-    private AvaliacaoRepository avaliacaoRepository;
+    private AvaliacaoDao AvaliacaoDao;
     @Autowired
-    private ReservaRepository reservaRepository;
+    private ReservaDao ReservaDao;
     @Autowired
-    private ClienteRepository clienteRepository;
+    private ClienteDao ClienteDao;
     @Autowired
-    private CarroRepository carroRepository;
+    private CarroDao CarroDao;
     @Autowired
     private PasswordEncoder passwordEncoder;
     @Autowired
@@ -58,11 +58,11 @@ public class CarroIntegrationTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        acessoRepository.deleteAll();
-        avaliacaoRepository.deleteAll();
-        reservaRepository.deleteAll();
-        carroRepository.deleteAll();
-        clienteRepository.deleteAll();
+        AcessoDao.deleteAll();
+        AvaliacaoDao.deleteAll();
+        ReservaDao.deleteAll();
+        CarroDao.deleteAll();
+        ClienteDao.deleteAll();
 
         Date birthDate = Date.from(LocalDate.of(1995, 5, 5)
                 .atStartOfDay(ZoneId.systemDefault()).toInstant());
@@ -78,7 +78,7 @@ public class CarroIntegrationTest {
                 .status(true)
                 .build();
 
-        clienteRepository.save(cliente);
+        ClienteDao.save(cliente);
         clienteId = cliente.getId();
 
         token = jwtService.generateToken(cliente.getEmail(), cliente.getRole().name());

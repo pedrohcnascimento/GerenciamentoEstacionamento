@@ -3,9 +3,9 @@ package inpark.gerenciamentoestacionamento.application.unit;
 import inpark.gerenciamentoestacionamento.application.dto.requests.AvaliacaoRequest;
 import inpark.gerenciamentoestacionamento.application.dto.response.AvaliacaoResponse;
 import inpark.gerenciamentoestacionamento.application.services.AvaliacaoService;
-import inpark.gerenciamentoestacionamento.infraestructure.repositories.AvaliacaoRepository;
-import inpark.gerenciamentoestacionamento.infraestructure.repositories.EstacionamentoRepository;
-import inpark.gerenciamentoestacionamento.infraestructure.repositories.usuario.ClienteRepository;
+import inpark.gerenciamentoestacionamento.dao.AvaliacaoDao;
+import inpark.gerenciamentoestacionamento.dao.EstacionamentoDao;
+import inpark.gerenciamentoestacionamento.dao.ClienteDao;
 import inpark.gerenciamentoestacionamento.model.entities.Avaliacao;
 import inpark.gerenciamentoestacionamento.model.entities.Estacionamento;
 import inpark.gerenciamentoestacionamento.model.entities.usuarios.Cliente;
@@ -32,11 +32,11 @@ import static org.mockito.Mockito.*;
 public class AvaliacaoServiceTest {
 
     @Mock
-    private AvaliacaoRepository avaliacaoRepository;
+    private AvaliacaoDao AvaliacaoDao;
     @Mock
-    private EstacionamentoRepository estacionamentoRepository;
+    private EstacionamentoDao EstacionamentoDao;
     @Mock
-    private ClienteRepository clienteRepository;
+    private ClienteDao ClienteDao;
     @Mock
     private ValidadorAvaliacao validador;
     @InjectMocks
@@ -77,53 +77,53 @@ public class AvaliacaoServiceTest {
 
     @Test
     void deveListarAvaliacoes() {
-        when(avaliacaoRepository.findByStatusTrue()).thenReturn(List.of(avaliacao));
+        when(AvaliacaoDao.findByStatusTrue()).thenReturn(List.of(avaliacao));
         List<AvaliacaoResponse> lista = avaliacaoService.listarAvaliacoes();
         assertEquals(1, lista.size());
         assertEquals((short) 4, lista.get(0).nota());
-        verify(avaliacaoRepository).findByStatusTrue();
+        verify(AvaliacaoDao).findByStatusTrue();
     }
 
     @Test
     void deveBuscarAvaliacaoPorId() {
-        when(avaliacaoRepository.findById(1L)).thenReturn(Optional.of(avaliacao));
+        when(AvaliacaoDao.findById(1L)).thenReturn(Optional.of(avaliacao));
         AvaliacaoResponse response = avaliacaoService.buscarPorId(1L);
         assertEquals((short) 4, response.nota());
-        verify(avaliacaoRepository).findById(1L);
+        verify(AvaliacaoDao).findById(1L);
     }
 
     @Test
     void deveLancarExcecaoAoBuscarIdNaoCadastrado() {
-        when(avaliacaoRepository.findById(2L)).thenReturn(Optional.empty());
+        when(AvaliacaoDao.findById(2L)).thenReturn(Optional.empty());
         IdNaoCadastrado ex = assertThrows(IdNaoCadastrado.class, () -> avaliacaoService.buscarPorId(2L));
         assertEquals("ID buscado não foi encontrado no sistema!", ex.getMessage());
     }
 
     @Test
     void deveCadastrarAvaliacao() {
-        when(clienteRepository.findById(1L)).thenReturn(Optional.of(cliente));
-        when(estacionamentoRepository.findById(1L)).thenReturn(Optional.of(estacionamento));
-        when(avaliacaoRepository.save(any(Avaliacao.class))).thenReturn(avaliacao);
+        when(ClienteDao.findById(1L)).thenReturn(Optional.of(cliente));
+        when(EstacionamentoDao.findById(1L)).thenReturn(Optional.of(estacionamento));
+        when(AvaliacaoDao.save(any(Avaliacao.class))).thenReturn(avaliacao);
 
         AvaliacaoResponse response = avaliacaoService.cadastrarAvaliacao(avaliacaoRequest);
         assertEquals((short) 4, response.nota());
         assertTrue(response.status());
-        verify(avaliacaoRepository).save(any(Avaliacao.class));
+        verify(AvaliacaoDao).save(any(Avaliacao.class));
     }
 
     @Test
     void deveLancarExcecaoQuandoClienteNaoExiste() {
-        when(clienteRepository.findById(anyLong())).thenReturn(Optional.empty());
+        when(ClienteDao.findById(anyLong())).thenReturn(Optional.empty());
         assertThrows(IdNaoCadastrado.class, () ->
                 avaliacaoService.cadastrarAvaliacao(avaliacaoRequest)
         );
-        verify(estacionamentoRepository, never()).findById(anyLong());
+        verify(EstacionamentoDao, never()).findById(anyLong());
     }
 
     @Test
     void deveLancarExcecaoQuandoEstacionamentoNaoExiste() {
-        when(clienteRepository.findById(anyLong())).thenReturn(Optional.of(new Cliente()));
-        when(estacionamentoRepository.findById(anyLong())).thenReturn(Optional.empty());
+        when(ClienteDao.findById(anyLong())).thenReturn(Optional.of(new Cliente()));
+        when(EstacionamentoDao.findById(anyLong())).thenReturn(Optional.empty());
         assertThrows(IdNaoCadastrado.class, () ->
                 avaliacaoService.cadastrarAvaliacao(avaliacaoRequest)
         );
@@ -131,21 +131,21 @@ public class AvaliacaoServiceTest {
 
     @Test
     void deveAtualizarAvaliacao() {
-        when(avaliacaoRepository.findById(1L)).thenReturn(Optional.of(avaliacao));
-        when(clienteRepository.findById(1L)).thenReturn(Optional.of(cliente));
-        when(estacionamentoRepository.findById(1L)).thenReturn(Optional.of(estacionamento));
-        when(avaliacaoRepository.save(any(Avaliacao.class))).thenReturn(avaliacao);
+        when(AvaliacaoDao.findById(1L)).thenReturn(Optional.of(avaliacao));
+        when(ClienteDao.findById(1L)).thenReturn(Optional.of(cliente));
+        when(EstacionamentoDao.findById(1L)).thenReturn(Optional.of(estacionamento));
+        when(AvaliacaoDao.save(any(Avaliacao.class))).thenReturn(avaliacao);
 
         AvaliacaoRequest req = new AvaliacaoRequest(1L, 1L, (short) 5, "Excelente", LocalDateTime.now());
         AvaliacaoResponse response = avaliacaoService.atualizarAvaliacao(req, 1L);
         assertEquals((short) 5, response.nota());
         assertEquals("Excelente", response.comentario());
-        verify(avaliacaoRepository).save(any(Avaliacao.class));
+        verify(AvaliacaoDao).save(any(Avaliacao.class));
     }
 
     @Test
     void deveLancarExcecaoAoAtualizarAvaliacaoInexistente() {
-        when(avaliacaoRepository.findById(2L)).thenReturn(Optional.empty());
+        when(AvaliacaoDao.findById(2L)).thenReturn(Optional.empty());
         AvaliacaoRequest req = new AvaliacaoRequest(1L, 1L, (short) 5, "Excelente", LocalDateTime.now());
         IdNaoCadastrado ex = assertThrows(IdNaoCadastrado.class, () -> avaliacaoService.atualizarAvaliacao(req, 2L));
         assertEquals("Id não encontrado!", ex.getMessage());
@@ -156,22 +156,22 @@ public class AvaliacaoServiceTest {
         estacionamento.getAvaliacoes().add(avaliacao);
         cliente.getAvaliacoes().add(avaliacao);
 
-        when(avaliacaoRepository.findById(1L)).thenReturn(Optional.of(avaliacao));
-        when(estacionamentoRepository.findById(1L)).thenReturn(Optional.of(estacionamento));
-        when(clienteRepository.findById(1L)).thenReturn(Optional.of(cliente));
-        when(avaliacaoRepository.save(any(Avaliacao.class))).thenReturn(avaliacao);
+        when(AvaliacaoDao.findById(1L)).thenReturn(Optional.of(avaliacao));
+        when(EstacionamentoDao.findById(1L)).thenReturn(Optional.of(estacionamento));
+        when(ClienteDao.findById(1L)).thenReturn(Optional.of(cliente));
+        when(AvaliacaoDao.save(any(Avaliacao.class))).thenReturn(avaliacao);
 
         avaliacaoService.deletarAvaliacao(1L);
 
         assertFalse(avaliacao.getStatus());
         assertFalse(estacionamento.getAvaliacoes().contains(avaliacao));
         assertFalse(cliente.getAvaliacoes().contains(avaliacao));
-        verify(avaliacaoRepository).save(avaliacao);
+        verify(AvaliacaoDao).save(avaliacao);
     }
 
     @Test
     void deveLancarExcecaoAoDeletarAvaliacaoInexistente() {
-        when(avaliacaoRepository.findById(2L)).thenReturn(Optional.empty());
+        when(AvaliacaoDao.findById(2L)).thenReturn(Optional.empty());
         IdNaoCadastrado ex = assertThrows(IdNaoCadastrado.class, () -> avaliacaoService.deletarAvaliacao(2L));
         assertEquals("Não foi possivel encontrar a avalição buscada", ex.getMessage());
     }
