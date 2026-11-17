@@ -4,11 +4,14 @@ import inpark.gerenciamentoestacionamento.application.dto.requests.usuario.Geren
 import inpark.gerenciamentoestacionamento.application.dto.response.usuario.GerenteResponse;
 import inpark.gerenciamentoestacionamento.application.services.usuario.GerenteService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -29,10 +32,7 @@ public class GerenteController {
             summary = "Listar todos os gerentes",
             description = "Retorna uma lista de todos os gerentes ativos cadastrados no sistema.",
             responses = {
-                    @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                            responseCode = "200",
-                            description = "Lista de gerentes retornada com sucesso"
-                    )
+                    @ApiResponse(responseCode = "200", description = "Lista de gerentes retornada com sucesso")
             }
     )
     public ResponseEntity<List<GerenteResponse>> listarGerentes() {
@@ -44,14 +44,8 @@ public class GerenteController {
             summary = "Buscar por ID",
             description = "Busca um gerente em específico através do ID",
             responses = {
-                    @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                            responseCode = "200",
-                            description = "Gerente encontrado com sucesso"
-                    ),
-                    @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                            responseCode = "404",
-                            description = "Gerente não encontrado"
-                    )
+                    @ApiResponse(responseCode = "200", description = "Gerente encontrado com sucesso"),
+                    @ApiResponse(responseCode = "404", description = "Gerente não encontrado")
             }
     )
     public ResponseEntity<GerenteResponse> buscarPorId(@PathVariable Long id) {
@@ -63,18 +57,19 @@ public class GerenteController {
             summary = "Cadastrar um novo gerente",
             description = "Cadastra um novo gerente no sistema com base nos dados fornecidos.",
             responses = {
-                    @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                            responseCode = "201",
-                            description = "Gerente cadastrado com sucesso"
-                    ),
-                    @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                            responseCode = "400",
-                            description = "Requisição inválida"
-                    )
+                    @ApiResponse(responseCode = "201", description = "Gerente cadastrado com sucesso"),
+                    @ApiResponse(responseCode = "400", description = "Requisição inválida"),
+                    @ApiResponse(responseCode = "404", description = "Estacionamento não encontrado"),
+                    @ApiResponse(responseCode = "409", description = "Conflito de dados (e-mail ou CPF/CNPJ já cadastrado)")
             }
     )
     public ResponseEntity<GerenteResponse> cadastrarGerente(@RequestBody @Valid GerenteRequest dto) {
-        return ResponseEntity.status(201).body(service.cadastrarGerente(dto));
+        GerenteResponse criado = service.cadastrarGerente(dto);
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(criado.id())
+                .toUri();
+        return ResponseEntity.created(location).body(criado);
     }
 
     @PutMapping("/{id}")
@@ -82,17 +77,12 @@ public class GerenteController {
             summary = "Atualizar um gerente existente",
             description = "Atualiza os dados de um gerente existente com base no ID fornecido.",
             responses = {
-                    @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                            responseCode = "200",
-                            description = "Gerente atualizado com sucesso"
-                    ),
-                    @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                            responseCode = "404",
-                            description = "Gerente não encontrado"
-                    )
+                    @ApiResponse(responseCode = "200", description = "Gerente atualizado com sucesso"),
+                    @ApiResponse(responseCode = "400", description = "Requisição inválida"),
+                    @ApiResponse(responseCode = "404", description = "Gerente não encontrado")
             }
     )
-    public ResponseEntity<GerenteResponse> atualizarGerente(@RequestBody GerenteRequest dto, @PathVariable Long id) {
+    public ResponseEntity<GerenteResponse> atualizarGerente(@RequestBody @Valid GerenteRequest dto, @PathVariable Long id) {
         return ResponseEntity.status(200).body(service.atualizarGerente(dto, id));
     }
 
@@ -101,14 +91,8 @@ public class GerenteController {
             summary = "Deletar um gerente",
             description = "Desativa (soft delete) um gerente existente com base no ID fornecido.",
             responses = {
-                    @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                            responseCode = "204",
-                            description = "Gerente deletado com sucesso (sem conteúdo no corpo)"
-                    ),
-                    @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                            responseCode = "404",
-                            description = "Gerente não encontrado"
-                    )
+                    @ApiResponse(responseCode = "204", description = "Gerente deletado com sucesso (sem conteúdo no corpo)"),
+                    @ApiResponse(responseCode = "404", description = "Gerente não encontrado")
             }
     )
     public ResponseEntity<Void> deletarGerente(@PathVariable Long id) {

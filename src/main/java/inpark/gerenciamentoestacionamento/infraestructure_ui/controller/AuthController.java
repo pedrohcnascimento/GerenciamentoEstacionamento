@@ -6,9 +6,9 @@ import inpark.gerenciamentoestacionamento.application.mappers.usuario.ClienteMap
 import inpark.gerenciamentoestacionamento.application.mappers.usuario.DonoMapper;
 import inpark.gerenciamentoestacionamento.application.mappers.usuario.GerenteMapper;
 import inpark.gerenciamentoestacionamento.application.services.AuthService;
-import inpark.gerenciamentoestacionamento.infraestructure.repositories.usuario.ClienteRepository;
-import inpark.gerenciamentoestacionamento.infraestructure.repositories.usuario.DonoRepository;
-import inpark.gerenciamentoestacionamento.infraestructure.repositories.usuario.GerenteRepository;
+import inpark.gerenciamentoestacionamento.dao.ClienteDao;
+import inpark.gerenciamentoestacionamento.dao.DonoDao;
+import inpark.gerenciamentoestacionamento.dao.GerenteDao;
 import inpark.gerenciamentoestacionamento.model.entities.usuarios.Cliente;
 import inpark.gerenciamentoestacionamento.model.enums.Role;
 import inpark.gerenciamentoestacionamento.model.enums.TipoDeUsuario;
@@ -19,6 +19,7 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -42,9 +43,9 @@ import java.util.Date;
 public class AuthController {
     private final AuthService authService;
     private final PasswordEncoder passwordEncoder;
-    private final ClienteRepository clienteRepository;
-    private final GerenteRepository gerenteRepository;
-    private final DonoRepository donoRepository;
+    private final ClienteDao ClienteDao;
+    private final GerenteDao GerenteDao;
+    private final DonoDao DonoDao;
 
     @PostMapping("/login")
     @Operation(
@@ -72,7 +73,7 @@ public class AuthController {
                     )
             )
     )
-    public ResponseEntity<UsuarioLoginResponse> login(@RequestBody UsuarioLoginRequest dto) {
+    public ResponseEntity<UsuarioLoginResponse> login(@RequestBody @Valid UsuarioLoginRequest dto) {
         String token = authService.login(dto);
         return ResponseEntity.ok(new UsuarioLoginResponse(token));
     }
@@ -97,21 +98,21 @@ public class AuthController {
         String username = userDetails.getUsername();
 
         if (userDetails.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_" + TipoDeUsuario.CLIENTE.name()))) {
-            return ResponseEntity.ok().body(ClienteMapper.fromEntity(clienteRepository.findByEmail(username).get()));
+            return ResponseEntity.ok().body(ClienteMapper.fromEntity(ClienteDao.findByEmail(username).get()));
         } else if (userDetails.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_" + TipoDeUsuario.DONO.name()))) {
-            return ResponseEntity.ok().body(DonoMapper.fromEntity(donoRepository.findByEmail(username).get()));
+            return ResponseEntity.ok().body(DonoMapper.fromEntity(DonoDao.findByEmail(username).get()));
         } else if (userDetails.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_" + TipoDeUsuario.GERENTE.name()))) {
-            return ResponseEntity.ok().body(GerenteMapper.fromEntity(gerenteRepository.findByEmail(username).get()));
+            return ResponseEntity.ok().body(GerenteMapper.fromEntity(GerenteDao.findByEmail(username).get()));
         } else if (userDetails.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_" + Role.ADMIN.name()))) {
-            var clienteOpt = clienteRepository.findByEmail(username);
+            var clienteOpt = ClienteDao.findByEmail(username);
             if (clienteOpt.isPresent()) {
                 return ResponseEntity.ok().body(ClienteMapper.fromEntity(clienteOpt.get()));
             }
-            var donoOpt = donoRepository.findByEmail(username);
+            var donoOpt = DonoDao.findByEmail(username);
             if (donoOpt.isPresent()) {
                 return ResponseEntity.ok().body(DonoMapper.fromEntity(donoOpt.get()));
             }
-            var gerenteOpt = gerenteRepository.findByEmail(username);
+            var gerenteOpt = GerenteDao.findByEmail(username);
             if (gerenteOpt.isPresent()) {
                 return ResponseEntity.ok().body(GerenteMapper.fromEntity(gerenteOpt.get()));
             }
@@ -129,7 +130,7 @@ public class AuthController {
             }
     )
     public String criarAdminTeste() {
-        if (clienteRepository.findByEmail("admin@teste.com").isPresent()) {
+        if (ClienteDao.findByEmail("admin@teste.com").isPresent()) {
             return "Admin já existe!";
         }
         Cliente u = new Cliente();
@@ -140,7 +141,7 @@ public class AuthController {
         u.setRole(Role.ADMIN);
         u.setTipoDeUsuario(TipoDeUsuario.CLIENTE);
         u.setStatus(true);
-        clienteRepository.save(u);
+        ClienteDao.save(u);
         return "Admin criado!";
     }
 }

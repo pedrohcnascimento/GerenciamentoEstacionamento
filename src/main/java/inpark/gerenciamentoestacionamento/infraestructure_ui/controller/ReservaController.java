@@ -6,9 +6,12 @@ import inpark.gerenciamentoestacionamento.application.services.ReservaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -58,11 +61,17 @@ public class ReservaController {
             responses = {
                     @ApiResponse(responseCode = "201", description = "Reserva cadastrada com sucesso"),
                     @ApiResponse(responseCode = "400", description = "Requisição inválida"),
-                    @ApiResponse(responseCode = "404", description = "Cliente ou estacionamento não encontrado")
+                    @ApiResponse(responseCode = "404", description = "Cliente ou estacionamento não encontrado"),
+                    @ApiResponse(responseCode = "409", description = "Não há vagas disponíveis para confirmar a reserva")
             }
     )
-    public ResponseEntity<ReservaResponse> cadastrarReserva(@RequestBody ReservaRequest dto) {
-        return ResponseEntity.status(201).body(service.cadastrarReserva(dto));
+    public ResponseEntity<ReservaResponse> cadastrarReserva(@RequestBody @Valid ReservaRequest dto) {
+        ReservaResponse criado = service.cadastrarReserva(dto);
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(criado.id())
+                .toUri();
+        return ResponseEntity.created(location).body(criado);
     }
 
     @PutMapping("/{id}")
@@ -72,10 +81,12 @@ public class ReservaController {
             description = "Altera as informações de uma reserva",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Reserva atualizada com sucesso"),
-                    @ApiResponse(responseCode = "404", description = "Reserva não encontrada")
+                    @ApiResponse(responseCode = "400", description = "Requisição inválida"),
+                    @ApiResponse(responseCode = "404", description = "Reserva não encontrada"),
+                    @ApiResponse(responseCode = "409", description = "Não há vagas disponíveis para confirmar a reserva")
             }
     )
-    public ResponseEntity<ReservaResponse> atualizarReserva(@RequestBody ReservaRequest dto, @PathVariable Long id) {
+    public ResponseEntity<ReservaResponse> atualizarReserva(@RequestBody @Valid ReservaRequest dto, @PathVariable Long id) {
         return ResponseEntity.status(200).body(service.atualizarReserva(dto, id));
     }
 

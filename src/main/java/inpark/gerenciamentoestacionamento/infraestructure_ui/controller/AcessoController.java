@@ -9,9 +9,12 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -81,8 +84,13 @@ public class AcessoController {
                     )
             )
     )
-    public ResponseEntity<AcessoResponse> cadastrarAcesso(@RequestBody AcessoRequest dto) {
-        return ResponseEntity.status(201).body(service.cadastrarAcesso(dto));
+    public ResponseEntity<AcessoResponse> cadastrarAcesso(@RequestBody @Valid AcessoRequest dto) {
+        AcessoResponse criado = service.cadastrarAcesso(dto);
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(criado.id())
+                .toUri();
+        return ResponseEntity.created(location).body(criado);
     }
 
     @PutMapping("/{id}")
@@ -92,10 +100,11 @@ public class AcessoController {
             description = "Atualiza um acesso já cadastrado no sistema",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Acesso atualizado com sucesso"),
+                    @ApiResponse(responseCode = "400", description = "Requisição inválida"),
                     @ApiResponse(responseCode = "404", description = "Acesso ou estacionamento não encontrado")
             }
     )
-    public ResponseEntity<AcessoResponse> atualizarAcesso(@PathVariable Long id, @RequestBody AcessoRequest dto) {
+    public ResponseEntity<AcessoResponse> atualizarAcesso(@PathVariable Long id, @RequestBody @Valid AcessoRequest dto) {
         return ResponseEntity.status(200).body(service.atualizarAcesso(dto, id));
     }
 

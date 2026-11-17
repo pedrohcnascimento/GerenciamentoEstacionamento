@@ -6,9 +6,12 @@ import inpark.gerenciamentoestacionamento.application.services.CarroService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -56,11 +59,17 @@ public class CarroController {
             responses = {
                     @ApiResponse(responseCode = "201", description = "Carro cadastrado com sucesso"),
                     @ApiResponse(responseCode = "400", description = "Requisição inválida"),
-                    @ApiResponse(responseCode = "404", description = "Cliente não encontrado")
+                    @ApiResponse(responseCode = "404", description = "Cliente não encontrado"),
+                    @ApiResponse(responseCode = "409", description = "Placa já cadastrada")
             }
     )
-    public ResponseEntity<CarroResponse> cadastrarCarro(@RequestBody CarroRequest dto) {
-        return ResponseEntity.status(201).body(service.cadastrarCarro(dto));
+    public ResponseEntity<CarroResponse> cadastrarCarro(@RequestBody @Valid CarroRequest dto) {
+        CarroResponse criado = service.cadastrarCarro(dto);
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(criado.id())
+                .toUri();
+        return ResponseEntity.created(location).body(criado);
     }
 
     @PutMapping("/{id}")
@@ -69,10 +78,11 @@ public class CarroController {
             description = "Atualiza os dados de um carro cadastrado no sistema",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Carro atualizado com sucesso"),
+                    @ApiResponse(responseCode = "400", description = "Requisição inválida"),
                     @ApiResponse(responseCode = "404", description = "Carro ou cliente não encontrado")
             }
     )
-    public ResponseEntity<CarroResponse> atualizarCarro(@RequestBody CarroRequest dto, @PathVariable Long id) {
+    public ResponseEntity<CarroResponse> atualizarCarro(@RequestBody @Valid CarroRequest dto, @PathVariable Long id) {
         return ResponseEntity.status(200).body(service.atualizarCarro(dto, id));
     }
 

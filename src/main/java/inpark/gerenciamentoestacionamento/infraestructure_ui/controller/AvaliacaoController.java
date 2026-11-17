@@ -6,9 +6,12 @@ import inpark.gerenciamentoestacionamento.application.services.AvaliacaoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -61,8 +64,13 @@ public class AvaliacaoController {
                     @ApiResponse(responseCode = "404", description = "Cliente ou estacionamento não encontrado")
             }
     )
-    public ResponseEntity<AvaliacaoResponse> cadastrarAvaliacao(@RequestBody AvaliacaoRequest dto) {
-        return ResponseEntity.status(201).body(service.cadastrarAvaliacao(dto));
+    public ResponseEntity<AvaliacaoResponse> cadastrarAvaliacao(@RequestBody @Valid AvaliacaoRequest dto) {
+        AvaliacaoResponse criado = service.cadastrarAvaliacao(dto);
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(criado.id())
+                .toUri();
+        return ResponseEntity.created(location).body(criado);
     }
 
     @PutMapping("/{id}")
@@ -76,7 +84,7 @@ public class AvaliacaoController {
                     @ApiResponse(responseCode = "404", description = "Avaliação, cliente ou estacionamento não encontrado")
             }
     )
-    public ResponseEntity<AvaliacaoResponse> atualizarAvaliacao(@PathVariable Long id, @RequestBody AvaliacaoRequest dto) {
+    public ResponseEntity<AvaliacaoResponse> atualizarAvaliacao(@PathVariable Long id, @RequestBody @Valid AvaliacaoRequest dto) {
         return ResponseEntity.status(200).body(service.atualizarAvaliacao(dto, id));
     }
 

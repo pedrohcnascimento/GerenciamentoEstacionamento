@@ -6,9 +6,12 @@ import inpark.gerenciamentoestacionamento.application.services.ValorService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -59,8 +62,13 @@ public class ValorController {
                     @ApiResponse(responseCode = "404", description = "Estacionamento não encontrado")
             }
     )
-    public ResponseEntity<ValorResponse> cadastrarValor(@RequestBody ValorRequest dto) {
-        return ResponseEntity.status(201).body(service.cadastrarValor(dto));
+    public ResponseEntity<ValorResponse> cadastrarValor(@RequestBody @Valid ValorRequest dto) {
+        ValorResponse criado = service.cadastrarValor(dto);
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(criado.id())
+                .toUri();
+        return ResponseEntity.created(location).body(criado);
     }
 
     @PutMapping("/{id}")
@@ -69,10 +77,11 @@ public class ValorController {
             description = "Atualiza um valor cadastrado no sistema",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Valor atualizado com sucesso"),
+                    @ApiResponse(responseCode = "400", description = "Requisição inválida"),
                     @ApiResponse(responseCode = "404", description = "Valor ou estacionamento não encontrado")
             }
     )
-    public ResponseEntity<ValorResponse> atualizarValor(@RequestBody ValorRequest dto, @PathVariable Long id) {
+    public ResponseEntity<ValorResponse> atualizarValor(@RequestBody @Valid ValorRequest dto, @PathVariable Long id) {
         return ResponseEntity.status(200).body(service.atualizarValor(dto, id));
     }
 
