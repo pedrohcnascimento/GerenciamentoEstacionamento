@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -24,11 +25,13 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.csrf(AbstractHttpConfigurer::disable)
+        http.cors(Customizer.withDefaults())
+                .csrf(AbstractHttpConfigurer::disable)
                 .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/auth/**", "/auth/refresh", "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/h2-console/**").permitAll()
 
                         // Permissoes de requisicoes GET
@@ -43,6 +46,11 @@ public class SecurityConfig {
                                 Role.DONO.name(),
                                 Role.ADMIN.name())
                         .requestMatchers(HttpMethod.GET, "/cliente", "/cliente/*").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/cliente/*/carros", "/cliente/*/reservas").hasAnyRole(
+                                Role.DONO.name(),
+                                Role.GERENTE.name(),
+                                Role.CLIENTE.name(),
+                                Role.ADMIN.name())
                         .requestMatchers(HttpMethod.GET, "/reserva", "/reserva/**").hasAnyRole(
                                 Role.DONO.name(),
                                 Role.GERENTE.name(),
@@ -54,11 +62,11 @@ public class SecurityConfig {
                                 Role.ADMIN.name())
 
                         // Permissoes de requisicoes POST
-                        .requestMatchers(HttpMethod.POST, "/carro", "/avaliacao", "/reserva", "/reserva/**").hasAnyRole(
+                        .requestMatchers(HttpMethod.POST, "/carro", "/avaliacao", "/reserva", "/reserva/**", "/cliente/*/carros", "/cliente/*/reservas").hasAnyRole(
                                 Role.CLIENTE.name(),
                                 Role.ADMIN.name())
                         .requestMatchers(HttpMethod.POST, "/cliente", "/dono").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/gerente", "/valor").hasAnyRole(
+                        .requestMatchers(HttpMethod.POST, "/gerente", "/valor", "/dono/*/estacionamentos").hasAnyRole(
                                 Role.DONO.name(),
                                 Role.ADMIN.name())
                         .requestMatchers(HttpMethod.POST, "/estacionamento/**", "/acesso", "/acesso/**").hasAnyRole(

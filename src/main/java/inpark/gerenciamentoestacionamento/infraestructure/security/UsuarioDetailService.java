@@ -1,6 +1,6 @@
 package inpark.gerenciamentoestacionamento.infraestructure.security;
 
-import inpark.gerenciamentoestacionamento.infraestructure.repositories.usuario.UsuarioRepository;
+import inpark.gerenciamentoestacionamento.dao.UsuarioDao;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -14,7 +14,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class UsuarioDetailService implements UserDetailsService {
-    private final UsuarioRepository repository;
+    private final UsuarioDao repository;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
