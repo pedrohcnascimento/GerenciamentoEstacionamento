@@ -1,6 +1,6 @@
-# Inpark — Gerenciamento de Estacionamento (Backend)
+# ParkWise — Gerenciamento de Estacionamento (Backend)
 
-API REST em **Java 21 + Spring Boot** para gerenciamento e reserva de vagas de estacionamento da plataforma **Inpark**, estruturada conforme a especificação **Global Solution 2026/2 · CitizenTech FIAP**.
+API REST em **Java 21 + Spring Boot** para gerenciamento e reserva de vagas de estacionamento da plataforma **ParkWise**, estruturada conforme a especificação **Global Solution 2026/2 · CitizenTech FIAP**.
 
 ---
 
@@ -18,7 +18,7 @@ API REST em **Java 21 + Spring Boot** para gerenciamento e reserva de vagas de e
 
 ## Estrutura de Pacotes
 
-`inpark.gerenciamentoestacionamento`
+`parkwise.gerenciamentoestacionamento`
 - `application/`
   - `dto/requests/` — DTOs de entrada (`AcessoRequest`, `AvaliacaoRequest`, `CarroRequest`, `EstacionamentoRequest`, `ReservaRequest`, `ValorRequest`, `ClienteRequest`, `DonoRequest`, `GerenteRequest`, `UsuarioRequest`, `UsuarioLoginRequest`, `UsuarioLoginResponse`)
   - `dto/response/` — DTOs de saída (`AcessoResponse`, `AvaliacaoResponse`, `CarroResponse`, `EstacionamentoResponse`, `ReservaResponse`, `ReservaResponseResumo`, `ValorResponse`, `ClienteResponse`, `DonoResponse`, `GerenteResponse`, `UsuarioResponse`)

@@ -1,0 +1,125 @@
+package parkwise.gerenciamentoestacionamento.infraestructure.security;
+
+import parkwise.gerenciamentoestacionamento.model.enums.Role;
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+@Configuration
+@RequiredArgsConstructor
+public class SecurityConfig {
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final UsuarioDetailService usuarioDetailService;
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http.cors(Customizer.withDefaults())
+                .csrf(AbstractHttpConfigurer::disable)
+                .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers("/auth/**", "/auth/refresh", "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/h2-console/**").permitAll()
+
+                        // Permissoes de requisicoes GET
+                        .requestMatchers(HttpMethod.GET, "/carro", "/carro/**").hasAnyRole(
+                                Role.CLIENTE.name(),
+                                Role.ADMIN.name())
+                        .requestMatchers(HttpMethod.GET, "/estacionamento", "/estacionamento/**", "/avaliacao", "/avaliacao/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/gerente", "/gerente/**", "/valor", "/valor/**").hasAnyRole(
+                                Role.DONO.name(),
+                                Role.ADMIN.name())
+                        .requestMatchers(HttpMethod.GET, "/dono", "/dono/**").hasAnyRole(
+                                Role.DONO.name(),
+                                Role.ADMIN.name())
+                        .requestMatchers(HttpMethod.GET, "/cliente", "/cliente/*").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/cliente/*/carros", "/cliente/*/reservas").hasAnyRole(
+                                Role.DONO.name(),
+                                Role.GERENTE.name(),
+                                Role.CLIENTE.name(),
+                                Role.ADMIN.name())
+                        .requestMatchers(HttpMethod.GET, "/reserva", "/reserva/**").hasAnyRole(
+                                Role.DONO.name(),
+                                Role.GERENTE.name(),
+                                Role.CLIENTE.name(),
+                                Role.ADMIN.name())
+                        .requestMatchers(HttpMethod.GET, "/acesso", "/acesso/**").hasAnyRole(
+                                Role.DONO.name(),
+                                Role.GERENTE.name(),
+                                Role.ADMIN.name())
+
+                        // Permissoes de requisicoes POST
+                        .requestMatchers(HttpMethod.POST, "/carro", "/avaliacao", "/reserva", "/reserva/**", "/cliente/*/carros", "/cliente/*/reservas").hasAnyRole(
+                                Role.CLIENTE.name(),
+                                Role.ADMIN.name())
+                        .requestMatchers(HttpMethod.POST, "/cliente", "/dono").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/gerente", "/valor", "/dono/*/estacionamentos", "/estacionamento/*/valores").hasAnyRole(
+                                Role.DONO.name(),
+                                Role.ADMIN.name())
+                        .requestMatchers(HttpMethod.POST, "/estacionamento/**", "/acesso", "/acesso/**").hasAnyRole(
+                                Role.CLIENTE.name(),
+                                Role.DONO.name(),
+                                Role.GERENTE.name(),
+                                Role.ADMIN.name())
+
+                        // Permissoes de requisicoes PUT
+                        .requestMatchers(HttpMethod.PUT, "/carro/**", "/avaliacao/**", "/cliente/**").hasAnyRole(
+                                Role.CLIENTE.name(),
+                                Role.ADMIN.name())
+                        .requestMatchers(HttpMethod.PUT, "/valor/**").hasAnyRole(
+                                Role.DONO.name(),
+                                Role.ADMIN.name())
+                        .requestMatchers(HttpMethod.PUT, "/gerente/**", "/dono/**").hasAnyRole(
+                                Role.DONO.name(),
+                                Role.ADMIN.name())
+                        .requestMatchers(HttpMethod.PUT, "/estacionamento/**", "/reserva/**", "/acesso/**").hasAnyRole(
+                                Role.DONO.name(),
+                                Role.GERENTE.name(),
+                                Role.ADMIN.name())
+
+                        // Permissoes de requisicoes DELETE
+                        .requestMatchers(HttpMethod.DELETE, "/cliente/**").hasAnyRole(
+                                Role.DONO.name(),
+                                Role.GERENTE.name(),
+                                Role.ADMIN.name())
+                        .requestMatchers(HttpMethod.DELETE, "/carro/**", "/avaliacao/**").hasAnyRole(
+                                Role.CLIENTE.name(),
+                                Role.ADMIN.name())
+                        .requestMatchers(HttpMethod.DELETE, "/estacionamento/**", "/valor/**", "/gerente/**", "/dono/**").hasAnyRole(
+                                Role.DONO.name(),
+                                Role.ADMIN.name())
+                        .requestMatchers(HttpMethod.DELETE, "/reserva/**", "/acesso/**").hasAnyRole(
+                                Role.DONO.name(),
+                                Role.GERENTE.name(),
+                                Role.ADMIN.name())
+
+                        .anyRequest().hasRole(Role.ADMIN.name())
+                )
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .userDetailsService(usuarioDetailService);
+        return http.build();
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+        return configuration.getAuthenticationManager();
+    }
+}

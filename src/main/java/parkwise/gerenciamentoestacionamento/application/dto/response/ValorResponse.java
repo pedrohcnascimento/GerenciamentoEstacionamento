@@ -1,0 +1,47 @@
+package parkwise.gerenciamentoestacionamento.application.dto.response;
+
+import parkwise.gerenciamentoestacionamento.model.enums.Cobranca;
+import parkwise.gerenciamentoestacionamento.model.enums.Metodo;
+import parkwise.gerenciamentoestacionamento.model.enums.Periodo;
+import io.swagger.v3.oas.annotations.media.Schema;
+
+public record ValorResponse(
+        Long id,
+        @Schema(
+                name = "tipoDeCobranca",
+                description = "Tipo de cobrança do estacionamento, definido por enum Cobranca",
+                examples = "PORHORA"
+        )
+        Cobranca tipoDeCobranca,
+        @Schema(
+                name = "tipoDePagamento",
+                description = "Tipo de pagamento do estacionamento, definido por enum Metodo",
+                examples = "DINHEIRO"
+        )
+        Metodo tipoDePagamento,
+        @Schema(
+                name = "preco",
+                description = "Preço cobrado pelo estacionamento",
+                examples = "10.00"
+        )
+        Double preco,
+        @Schema(
+                name = "periodo",
+                description = "Período de cobrança do estacionamento, definido por enum Periodo",
+                examples = "FINALDESEMANA"
+        )
+        Periodo periodo,
+        @Schema(
+                name = "estacioId",
+                description = "ID do estacionamento associado a esse valor",
+                examples = "1"
+        )
+        Long estacioId,
+        @Schema(
+                name = "status",
+                description = "Status da entidade, se está ativa ou inativa no sistema",
+                examples = "true"
+        )
+        Boolean status
+) {
+}
