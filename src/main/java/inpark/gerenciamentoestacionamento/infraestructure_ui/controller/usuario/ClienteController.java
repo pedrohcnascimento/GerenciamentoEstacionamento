@@ -19,7 +19,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/cliente")
 @Tag(
-        name = "2. Clientes",
+        name = "02. Clientes",
         description = "Cadastro, consulta, atualização e remoção de clientes"
 )
 public class ClienteController {

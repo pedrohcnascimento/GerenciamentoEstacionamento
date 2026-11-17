@@ -17,7 +17,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/estacionamento")
 @Tag(
-        name = "5. Estacionamentos",
+        name = "05. Estacionamentos",
         description = "Consulta, atualização e remoção de estacionamentos"
 )
 public class EstacionamentoController {

@@ -17,7 +17,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/valor")
 @Tag(
-        name = "7. Tarifas e Valores",
+        name = "07. Tarifas e Valores",
         description = "CRUD direto de tabelas de preços e cobranças (requer perfil DONO ou ADMIN)"
 )
 public class ValorController {

@@ -38,7 +38,7 @@ import java.util.Date;
 @RequestMapping("/auth")
 @RequiredArgsConstructor
 @Tag(
-        name = "1. Autenticação",
+        name = "01. Autenticação",
         description = "Login JWT, consulta do perfil autenticado e criação de usuário ADMIN para testes"
 )
 public class AuthController {

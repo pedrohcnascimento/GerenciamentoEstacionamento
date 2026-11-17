@@ -20,7 +20,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/acesso")
 @Tag(
-        name = "9. Acessos (Entrada e Saída)",
+        name = "09. Acessos (Entrada e Saída)",
         description = "CRUD direto de registros de entrada e saída de veículos nos estacionamentos"
 )
 public class AcessoController {
