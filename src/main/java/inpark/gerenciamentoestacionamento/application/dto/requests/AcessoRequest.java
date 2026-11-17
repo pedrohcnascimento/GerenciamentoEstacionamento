@@ -2,6 +2,9 @@ package inpark.gerenciamentoestacionamento.application.dto.requests;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
 
 import java.time.LocalTime;
 
@@ -14,10 +17,10 @@ public record AcessoRequest(
         Long carroId,
         @Schema(
                 name = "placaDoCarro",
-                description = "Placa do carro que acessou o estacionamento, caso erro," +
-                        " resulta em Null e necessita preenchimento manual posteriormente.",
+                description = "Placa do carro que acessou o estacionamento",
                 example = "EUD8679"
         )
+        @NotBlank(message = "A placa do carro é obrigatória")
         String placaDoCarro,
         @Schema(
                 name = "horaDeEntrada",
@@ -40,12 +43,14 @@ public record AcessoRequest(
                 description = "Valor total a pagar pelo tempo de uso do estacionamento",
                 example = "15.00"
         )
+        @PositiveOrZero(message = "O valor a pagar não pode ser negativo")
         Double valorAPagar,
         @Schema(
                 name = "estacioId",
                 description = "Id do estacionamento em que o veiculo entrou",
                 example = "1"
         )
+        @NotNull(message = "O estacioId é obrigatório")
         @JsonAlias({"estacionamentoId", "estacioId"})
         Long estacioId
 ) {
