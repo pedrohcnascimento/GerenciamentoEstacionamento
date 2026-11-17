@@ -1,6 +1,7 @@
 package inpark.gerenciamentoestacionamento.infraestructure.handler;
 
 import inpark.gerenciamentoestacionamento.model.exceptions.*;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -21,6 +22,17 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(404).body(Map.of("erro", ex.getMessage()));
     }
 
+    @ExceptionHandler(ConflitoDeRegraDeNegocioException.class)
+    public ResponseEntity<?> handleConflitoDeRegraDeNegocio(ConflitoDeRegraDeNegocioException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("erro", ex.getMessage()));
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<?> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Map.of("erro", "Conflito de integridade: registro duplicado ou vinculado a outros dados."));
+    }
+
     @ExceptionHandler(AuthorizationDeniedException.class)
     public ResponseEntity<?> handleAuthorizationDeniedException(AuthorizationDeniedException ex) {
         return ResponseEntity
@@ -35,7 +47,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(NullPointerException.class)
     public ResponseEntity<?> handleNullPointerException(NullPointerException ex) {
-        return ResponseEntity.status(400).body(Map.of("erro", ex.getMessage() != null ? ex.getMessage() : "NullPointerException"));
+        return ResponseEntity.status(400).body(Map.of("erro", "Dados obrigatórios ausentes ou inválidos."));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -47,16 +59,11 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<?> handleJsonParseError(HttpMessageNotReadableException ex) {
-        String mensagem = "Erro ao processar JSON. Verifique os dados enviados.";
-        Throwable causa = ex.getCause();
-        if (causa != null) {
-            mensagem += " Detalhes: " + causa.getMessage();
-        }
         return ResponseEntity
                 .badRequest()
                 .body(Map.of(
                         "status", 400,
-                        "erro", mensagem
+                        "erro", "Erro ao processar JSON. Verifique o formato e os tipos dos dados enviados."
                 ));
     }
 
@@ -89,11 +96,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<?> handleMethodNotSupported(HttpRequestMethodNotSupportedException ex) {
         return ResponseEntity
                 .status(HttpStatus.METHOD_NOT_ALLOWED)
-                .body(Map.of("erro", "Request method '" + ex.getMethod() + "' is not supported"));
+                .body(Map.of("erro", "Método HTTP '" + ex.getMethod() + "' não é suportado para esta rota."));
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> handleAnyException(Exception ex) {
-        return ResponseEntity.status(500).body(Map.of("erro", ex.getMessage() != null ? ex.getMessage() : "Erro interno"));
+        return ResponseEntity.status(500).body(Map.of("erro", "Erro interno inesperado no servidor."));
     }
 }
