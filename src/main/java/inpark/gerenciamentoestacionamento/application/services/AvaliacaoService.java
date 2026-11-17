@@ -3,16 +3,16 @@ package inpark.gerenciamentoestacionamento.application.services;
 import inpark.gerenciamentoestacionamento.application.dto.requests.AvaliacaoRequest;
 import inpark.gerenciamentoestacionamento.application.dto.response.AvaliacaoResponse;
 import inpark.gerenciamentoestacionamento.application.mappers.AvaliacaoMapper;
-import inpark.gerenciamentoestacionamento.infraestructure.repositories.AvaliacaoRepository;
-import inpark.gerenciamentoestacionamento.infraestructure.repositories.EstacionamentoRepository;
-import inpark.gerenciamentoestacionamento.infraestructure.repositories.usuario.ClienteRepository;
+import inpark.gerenciamentoestacionamento.dao.AvaliacaoDao;
+import inpark.gerenciamentoestacionamento.dao.EstacionamentoDao;
+import inpark.gerenciamentoestacionamento.dao.ClienteDao;
 import inpark.gerenciamentoestacionamento.model.entities.Avaliacao;
 import inpark.gerenciamentoestacionamento.model.entities.Estacionamento;
 import inpark.gerenciamentoestacionamento.model.entities.usuarios.Cliente;
 import inpark.gerenciamentoestacionamento.model.exceptions.IdNaoCadastrado;
 import inpark.gerenciamentoestacionamento.model.service.ValidadorAvaliacao;
-import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -21,30 +21,40 @@ import java.util.Optional;
 
 @Service
 public class AvaliacaoService {
-    private final AvaliacaoRepository avaliacaoRepository;
-    private final EstacionamentoRepository estacionamentoRepository;
-    private final ClienteRepository clienteRepository;
+    private final AvaliacaoDao AvaliacaoDao;
+    private final EstacionamentoDao EstacionamentoDao;
+    private final ClienteDao ClienteDao;
     private final ValidadorAvaliacao validador;
 
-    public AvaliacaoService(AvaliacaoRepository avaliacaoRepository,
-                            EstacionamentoRepository estacionamentoRepository,
-                            ClienteRepository clienteRepository,
+    public AvaliacaoService(AvaliacaoDao AvaliacaoDao,
+                            EstacionamentoDao EstacionamentoDao,
+                            ClienteDao ClienteDao,
                             ValidadorAvaliacao validador) {
-        this.avaliacaoRepository = avaliacaoRepository;
-        this.estacionamentoRepository = estacionamentoRepository;
-        this.clienteRepository = clienteRepository;
+        this.AvaliacaoDao = AvaliacaoDao;
+        this.EstacionamentoDao = EstacionamentoDao;
+        this.ClienteDao = ClienteDao;
         this.validador = validador;
     }
 
     public List<AvaliacaoResponse> listarAvaliacoes() {
-        return avaliacaoRepository.findByStatusTrue()
+        return AvaliacaoDao.findByStatusTrue()
+                .stream()
+                .map(AvaliacaoMapper::fromEntity)
+                .toList();
+    }
+
+    public List<AvaliacaoResponse> listarPorEstacionamento(Long estacionamentoId) {
+        if (estacionamentoId == null || EstacionamentoDao.findById(estacionamentoId).isEmpty()) {
+            throw new IdNaoCadastrado("Estacionamento não encontrado no sistema");
+        }
+        return AvaliacaoDao.findByEstacionamentoId(estacionamentoId)
                 .stream()
                 .map(AvaliacaoMapper::fromEntity)
                 .toList();
     }
 
     public AvaliacaoResponse buscarPorId(Long id) {
-        Optional<Avaliacao> optionalAvaliacao = avaliacaoRepository.findById(id);
+        Optional<Avaliacao> optionalAvaliacao = AvaliacaoDao.findById(id);
 
         if (optionalAvaliacao.isEmpty()) {
             throw new IdNaoCadastrado("ID buscado não foi encontrado no sistema!");
@@ -63,13 +73,13 @@ public class AvaliacaoService {
             avaliacao.setDataDeAvaliacao(LocalDateTime.now());
         }
 
-        Cliente cliente = clienteRepository.findById(dto.clienteId())
+        Cliente cliente = ClienteDao.findById(dto.clienteId())
                 .orElseThrow(() -> new IdNaoCadastrado("Cliente não encontrado no sistema"));
 
         if (dto.estacionamentoId() == null) {
             throw new IdNaoCadastrado("Estacionamento não encontrado no sistema");
         }
-        Estacionamento estacionamento = estacionamentoRepository.findById(dto.estacionamentoId())
+        Estacionamento estacionamento = EstacionamentoDao.findById(dto.estacionamentoId())
                 .orElseThrow(() -> new IdNaoCadastrado("Estacionamento não encontrado no sistema"));
 
         avaliacao.setCliente(cliente);
@@ -91,22 +101,22 @@ public class AvaliacaoService {
 
         estacionamento.calcularNotaMedia();
 
-        return AvaliacaoMapper.fromEntity(avaliacaoRepository.save(avaliacao));
+        return AvaliacaoMapper.fromEntity(AvaliacaoDao.save(avaliacao));
     }
 
     @Transactional
     public AvaliacaoResponse atualizarAvaliacao(AvaliacaoRequest dto, Long id) {
-        Avaliacao avaliacao = avaliacaoRepository.findById(id)
+        Avaliacao avaliacao = AvaliacaoDao.findById(id)
                 .orElseThrow(() -> new IdNaoCadastrado("Id não encontrado!"));
         if (dto.clienteId() == null) {
             throw new IdNaoCadastrado("Cliente não cadastrado no sistema!");
         }
-        Cliente cliente = clienteRepository.findById(dto.clienteId())
+        Cliente cliente = ClienteDao.findById(dto.clienteId())
                 .orElseThrow(() -> new IdNaoCadastrado("Cliente não cadastrado no sistema!"));
         if (dto.estacionamentoId() == null) {
             throw new IdNaoCadastrado("Estacionamento não encontrado no sistema!");
         }
-        Estacionamento estacionamento = estacionamentoRepository.findById(dto.estacionamentoId())
+        Estacionamento estacionamento = EstacionamentoDao.findById(dto.estacionamentoId())
                 .orElseThrow(() -> new IdNaoCadastrado("Estacionamento não encontrado no sistema!"));
 
         validador.validarAvaliacaoAposUso(avaliacao);
@@ -123,20 +133,20 @@ public class AvaliacaoService {
 
         estacionamento.calcularNotaMedia();
 
-        return AvaliacaoMapper.fromEntity(avaliacaoRepository.save(avaliacao));
+        return AvaliacaoMapper.fromEntity(AvaliacaoDao.save(avaliacao));
     }
 
     @Transactional
     public void deletarAvaliacao(Long id) {
-        Optional<Avaliacao> optAvaliacao = avaliacaoRepository.findById(id);
+        Optional<Avaliacao> optAvaliacao = AvaliacaoDao.findById(id);
 
         if (optAvaliacao.isEmpty()) {
             throw new IdNaoCadastrado("Não foi possivel encontrar a avalição buscada");
         }
         Avaliacao avaliacao = optAvaliacao.get();
 
-        Optional<Estacionamento> optEstacio = estacionamentoRepository.findById(avaliacao.getEstacionamento().getId());
-        Optional<Cliente> optCliente = clienteRepository.findById(avaliacao.getCliente().getId());
+        Optional<Estacionamento> optEstacio = EstacionamentoDao.findById(avaliacao.getEstacionamento().getId());
+        Optional<Cliente> optCliente = ClienteDao.findById(avaliacao.getCliente().getId());
 
         if (optCliente.isEmpty() || optEstacio.isEmpty()) {
             throw new IdNaoCadastrado("Cliente ou estacionamento não encontrado no sistema");
@@ -154,6 +164,6 @@ public class AvaliacaoService {
 
         avaliacao.setStatus(false);
         estacionamento.calcularNotaMedia();
-        avaliacaoRepository.save(avaliacao);
+        AvaliacaoDao.save(avaliacao);
     }
 }

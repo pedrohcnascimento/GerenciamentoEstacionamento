@@ -3,14 +3,15 @@ package inpark.gerenciamentoestacionamento.application.services.usuario;
 import inpark.gerenciamentoestacionamento.application.dto.requests.usuario.DonoRequest;
 import inpark.gerenciamentoestacionamento.application.dto.response.usuario.DonoResponse;
 import inpark.gerenciamentoestacionamento.application.mappers.usuario.DonoMapper;
-import inpark.gerenciamentoestacionamento.infraestructure.repositories.usuario.DonoRepository;
+import inpark.gerenciamentoestacionamento.dao.DonoDao;
 import inpark.gerenciamentoestacionamento.model.entities.usuarios.DonoEstacionamento;
 import inpark.gerenciamentoestacionamento.model.enums.TipoDeUsuario;
+import inpark.gerenciamentoestacionamento.model.exceptions.ConflitoDeRegraDeNegocioException;
 import inpark.gerenciamentoestacionamento.model.exceptions.IdNaoCadastrado;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,18 +19,18 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class DonoService {
-    private final DonoRepository donoRepository;
+    private final DonoDao DonoDao;
     private final PasswordEncoder passwordEncoder;
 
     public List<DonoResponse> listarDonos() {
-        return donoRepository.findByStatusTrue()
+        return DonoDao.findByStatusTrue()
                 .stream()
                 .map(DonoMapper::fromEntity)
                 .toList();
     }
 
     public DonoResponse buscarPorId(Long id) {
-        Optional<DonoEstacionamento> optionalDono = donoRepository.findById(id);
+        Optional<DonoEstacionamento> optionalDono = DonoDao.findById(id);
 
         if (optionalDono.isEmpty()) {
             throw new IdNaoCadastrado("ID buscado não foi encontrado no sistema!");
@@ -40,18 +41,21 @@ public class DonoService {
 
     @Transactional
     public DonoResponse cadastrarDono(DonoRequest dto) {
+        if (dto.email() != null && DonoDao.findByEmail(dto.email()).isPresent()) {
+            throw new ConflitoDeRegraDeNegocioException("Já existe um proprietário cadastrado com este e-mail.");
+        }
         DonoEstacionamento dono = DonoMapper.toEntity(dto);
         dono.setSenha(passwordEncoder.encode(dto.senha()));
         dono.setStatus(true);
         dono.setTipoDeUsuario(TipoDeUsuario.DONO);
-        DonoEstacionamento salvo = donoRepository.save(dono);
+        DonoEstacionamento salvo = DonoDao.save(dono);
 
         return DonoMapper.fromEntity(salvo);
     }
 
     @Transactional
     public DonoResponse atualizarDono(DonoRequest dto, Long id) {
-        Optional<DonoEstacionamento> optDono = donoRepository.findById(id);
+        Optional<DonoEstacionamento> optDono = DonoDao.findById(id);
 
         if (optDono.isEmpty()) {
             throw new IdNaoCadastrado("O Id não foi encontrado no sistema!");
@@ -67,12 +71,12 @@ public class DonoService {
         dono.setEmail(dto.email());
         dono.setDataNascimento(dto.dataNascimento());
 
-        return DonoMapper.fromEntity(donoRepository.save(dono));
+        return DonoMapper.fromEntity(DonoDao.save(dono));
     }
 
     @Transactional
     public void deletarDono(Long id) {
-        Optional<DonoEstacionamento> optDono = donoRepository.findById(id);
+        Optional<DonoEstacionamento> optDono = DonoDao.findById(id);
 
         if (optDono.isEmpty()) {
             throw new IdNaoCadastrado("Dono buscado não cadastrado no sistema");
@@ -81,6 +85,6 @@ public class DonoService {
         DonoEstacionamento dono = optDono.get();
 
         dono.setStatus(false);
-        donoRepository.save(dono);
+        DonoDao.save(dono);
     }
 }

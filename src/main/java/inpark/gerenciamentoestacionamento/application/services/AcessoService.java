@@ -3,17 +3,17 @@ package inpark.gerenciamentoestacionamento.application.services;
 import inpark.gerenciamentoestacionamento.application.dto.requests.AcessoRequest;
 import inpark.gerenciamentoestacionamento.application.dto.response.AcessoResponse;
 import inpark.gerenciamentoestacionamento.application.mappers.AcessoMapper;
-import inpark.gerenciamentoestacionamento.infraestructure.repositories.AcessoRepository;
-import inpark.gerenciamentoestacionamento.infraestructure.repositories.CarroRepository;
-import inpark.gerenciamentoestacionamento.infraestructure.repositories.EstacionamentoRepository;
+import inpark.gerenciamentoestacionamento.dao.AcessoDao;
+import inpark.gerenciamentoestacionamento.dao.CarroDao;
+import inpark.gerenciamentoestacionamento.dao.EstacionamentoDao;
 import inpark.gerenciamentoestacionamento.model.entities.Acesso;
 import inpark.gerenciamentoestacionamento.model.entities.Carro;
 import inpark.gerenciamentoestacionamento.model.entities.Estacionamento;
 import inpark.gerenciamentoestacionamento.model.entities.Valor;
 import inpark.gerenciamentoestacionamento.model.enums.Cobranca;
 import inpark.gerenciamentoestacionamento.model.exceptions.IdNaoCadastrado;
-import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -22,27 +22,37 @@ import java.util.Optional;
 
 @Service
 public class AcessoService {
-    private final AcessoRepository acessoRepository;
-    private final EstacionamentoRepository estacionamentoRepository;
-    private final CarroRepository carroRepository;
+    private final AcessoDao AcessoDao;
+    private final EstacionamentoDao EstacionamentoDao;
+    private final CarroDao CarroDao;
 
-    public AcessoService(AcessoRepository acessoRepository,
-                         EstacionamentoRepository estacionamentoRepository,
-                         CarroRepository carroRepository) {
-        this.acessoRepository = acessoRepository;
-        this.estacionamentoRepository = estacionamentoRepository;
-        this.carroRepository = carroRepository;
+    public AcessoService(AcessoDao AcessoDao,
+                         EstacionamentoDao EstacionamentoDao,
+                         CarroDao CarroDao) {
+        this.AcessoDao = AcessoDao;
+        this.EstacionamentoDao = EstacionamentoDao;
+        this.CarroDao = CarroDao;
     }
 
     public List<AcessoResponse> listarAcessos() {
-        return acessoRepository.findByStatusTrue()
+        return AcessoDao.findByStatusTrue()
+                .stream()
+                .map(AcessoMapper::fromEntity)
+                .toList();
+    }
+
+    public List<AcessoResponse> listarPorEstacionamento(Long estacionamentoId) {
+        if (estacionamentoId == null || EstacionamentoDao.findById(estacionamentoId).isEmpty()) {
+            throw new IdNaoCadastrado("Id do estacionamento não encontrado no sistema");
+        }
+        return AcessoDao.findByEstacionamentoId(estacionamentoId)
                 .stream()
                 .map(AcessoMapper::fromEntity)
                 .toList();
     }
 
     public AcessoResponse buscarPorId(Long id) {
-        Optional<Acesso> optionalAcesso = acessoRepository.findById(id);
+        Optional<Acesso> optionalAcesso = AcessoDao.findById(id);
 
         if (optionalAcesso.isEmpty()) {
             throw new IdNaoCadastrado("ID buscado não foi encontrado no sistema!");
@@ -80,18 +90,18 @@ public class AcessoService {
 
         acesso.calcularHorasTotais();
 
-        Optional<Estacionamento> optEstacionamento = estacionamentoRepository.findById(dto.estacioId());
+        Optional<Estacionamento> optEstacionamento = EstacionamentoDao.findById(dto.estacioId());
         if (optEstacionamento.isEmpty()) {
             throw new IdNaoCadastrado("Id do estacionamento não encontrado no sistema");
         }
 
         Optional<Carro> optCarro = dto.placaDoCarro() != null
-                ? carroRepository.findByPlaca(dto.placaDoCarro())
+                ? CarroDao.findByPlaca(dto.placaDoCarro())
                 : Optional.empty();
         if (optCarro.isPresent()) {
             acesso.setCarro(optCarro.get());
         } else if (dto.carroId() != null) {
-            acesso.setCarro(carroRepository.findById(dto.carroId()).orElse(null));
+            acesso.setCarro(CarroDao.findById(dto.carroId()).orElse(null));
         } else {
             acesso.setCarro(null);
         }
@@ -112,7 +122,7 @@ public class AcessoService {
         estacionamento.getAcessos().add(acesso);
 
         acesso.setStatus(true);
-        return AcessoMapper.fromEntity(acessoRepository.save(acesso));
+        return AcessoMapper.fromEntity(AcessoDao.save(acesso));
     }
 
     @Transactional
@@ -120,8 +130,8 @@ public class AcessoService {
         if (dto.estacioId() == null) {
             throw new IdNaoCadastrado("O Acesso ou estacionamento buscado não existe no sistema");
         }
-        Optional<Acesso> optAcesso = acessoRepository.findById(id);
-        Optional<Estacionamento> optEstacionamento = estacionamentoRepository.findById(dto.estacioId());
+        Optional<Acesso> optAcesso = AcessoDao.findById(id);
+        Optional<Estacionamento> optEstacionamento = EstacionamentoDao.findById(dto.estacioId());
 
         if (optAcesso.isEmpty() || optEstacionamento.isEmpty()) {
             throw new IdNaoCadastrado("O Acesso ou estacionamento buscado não existe no sistema");
@@ -148,12 +158,12 @@ public class AcessoService {
         }
         acesso.setEstacionamento(estacionamento);
 
-        return AcessoMapper.fromEntity(acessoRepository.save(acesso));
+        return AcessoMapper.fromEntity(AcessoDao.save(acesso));
     }
 
     @Transactional
     public void deletarAcesso(Long id) {
-        Optional<Acesso> optAcesso = acessoRepository.findById(id);
+        Optional<Acesso> optAcesso = AcessoDao.findById(id);
 
         if (optAcesso.isEmpty()) {
             throw new IdNaoCadastrado("Acesso buscado não cadastrado no sistema");
@@ -167,6 +177,6 @@ public class AcessoService {
         }
 
         acesso.setStatus(false);
-        acessoRepository.save(acesso);
+        AcessoDao.save(acesso);
     }
 }

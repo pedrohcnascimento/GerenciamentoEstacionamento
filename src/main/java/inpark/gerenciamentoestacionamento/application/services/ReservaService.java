@@ -3,17 +3,18 @@ package inpark.gerenciamentoestacionamento.application.services;
 import inpark.gerenciamentoestacionamento.application.dto.requests.ReservaRequest;
 import inpark.gerenciamentoestacionamento.application.dto.response.ReservaResponse;
 import inpark.gerenciamentoestacionamento.application.mappers.ReservaMapper;
-import inpark.gerenciamentoestacionamento.infraestructure.repositories.EstacionamentoRepository;
-import inpark.gerenciamentoestacionamento.infraestructure.repositories.ReservaRepository;
-import inpark.gerenciamentoestacionamento.infraestructure.repositories.usuario.ClienteRepository;
+import inpark.gerenciamentoestacionamento.dao.EstacionamentoDao;
+import inpark.gerenciamentoestacionamento.dao.ReservaDao;
+import inpark.gerenciamentoestacionamento.dao.ClienteDao;
 import inpark.gerenciamentoestacionamento.model.entities.Estacionamento;
 import inpark.gerenciamentoestacionamento.model.entities.Reserva;
 import inpark.gerenciamentoestacionamento.model.entities.usuarios.Cliente;
 import inpark.gerenciamentoestacionamento.model.enums.OrigemReserva;
 import inpark.gerenciamentoestacionamento.model.enums.StatusReserva;
+import inpark.gerenciamentoestacionamento.model.exceptions.ConflitoDeRegraDeNegocioException;
 import inpark.gerenciamentoestacionamento.model.exceptions.IdNaoCadastrado;
-import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -22,27 +23,47 @@ import java.util.Optional;
 
 @Service
 public class ReservaService {
-    private final ReservaRepository reservaRepository;
-    private final EstacionamentoRepository estacionamentoRepository;
-    private final ClienteRepository clienteRepository;
+    private final ReservaDao ReservaDao;
+    private final EstacionamentoDao EstacionamentoDao;
+    private final ClienteDao ClienteDao;
 
-    public ReservaService(EstacionamentoRepository estacionamentoRepository,
-                          ClienteRepository clienteRepository,
-                          ReservaRepository reservaRepository) {
-        this.estacionamentoRepository = estacionamentoRepository;
-        this.clienteRepository = clienteRepository;
-        this.reservaRepository = reservaRepository;
+    public ReservaService(EstacionamentoDao EstacionamentoDao,
+                          ClienteDao ClienteDao,
+                          ReservaDao ReservaDao) {
+        this.EstacionamentoDao = EstacionamentoDao;
+        this.ClienteDao = ClienteDao;
+        this.ReservaDao = ReservaDao;
     }
 
     public List<ReservaResponse> listarReservas() {
-        return reservaRepository.findByStatusTrue()
+        return ReservaDao.findByStatusTrue()
+                .stream()
+                .map(ReservaMapper::fromEntity)
+                .toList();
+    }
+
+    public List<ReservaResponse> listarPorEstacionamento(Long estacionamentoId) {
+        if (estacionamentoId == null || EstacionamentoDao.findById(estacionamentoId).isEmpty()) {
+            throw new IdNaoCadastrado("Estacionamento não encontrado no sistema!");
+        }
+        return ReservaDao.findByEstacionamentoId(estacionamentoId)
+                .stream()
+                .map(ReservaMapper::fromEntity)
+                .toList();
+    }
+
+    public List<ReservaResponse> listarPorCliente(Long clienteId) {
+        if (clienteId == null || ClienteDao.findById(clienteId).isEmpty()) {
+            throw new IdNaoCadastrado("Cliente não encontrado no sistema!");
+        }
+        return ReservaDao.findByClienteId(clienteId)
                 .stream()
                 .map(ReservaMapper::fromEntity)
                 .toList();
     }
 
     public ReservaResponse buscarPorId(Long id) {
-        Optional<Reserva> optionalReserva = reservaRepository.findById(id);
+        Optional<Reserva> optionalReserva = ReservaDao.findById(id);
 
         if (optionalReserva.isEmpty()) {
             throw new IdNaoCadastrado("ID buscado não foi encontrado no sistema!");
@@ -67,8 +88,8 @@ public class ReservaService {
             novaReserva.setCriadaEm(Instant.now());
         }
 
-        Optional<Cliente> optionalCliente = clienteRepository.findById(dto.clienteId());
-        Optional<Estacionamento> optionalEstacionamento = estacionamentoRepository.findById(dto.estacioId());
+        Optional<Cliente> optionalCliente = ClienteDao.findById(dto.clienteId());
+        Optional<Estacionamento> optionalEstacionamento = EstacionamentoDao.findById(dto.estacioId());
 
         if (optionalCliente.isEmpty() || optionalEstacionamento.isEmpty()) {
             throw new IdNaoCadastrado("Cliente ou estacionameno não encontrado no sistema!");
@@ -87,22 +108,26 @@ public class ReservaService {
             cliente.setReservas(new ArrayList<>());
         }
 
-        if (novaReserva.getStatusReserva() == StatusReserva.ACEITA
-                && estacionamento.getVagasDisponiveis() != null
-                && estacionamento.getVagasDisponiveis() > 0) {
-            estacionamento.setVagasDisponiveis(estacionamento.getVagasDisponiveis() - 1);
+        if (novaReserva.getStatusReserva() == StatusReserva.ACEITA) {
+            if (estacionamento.getVagasDisponiveis() != null && estacionamento.getVagasDisponiveis() <= 0) {
+                throw new ConflitoDeRegraDeNegocioException("Não há vagas disponíveis neste estacionamento para confirmar a reserva.");
+            }
+            if (estacionamento.getVagasDisponiveis() != null) {
+                estacionamento.setVagasDisponiveis(estacionamento.getVagasDisponiveis() - 1);
+                EstacionamentoDao.save(estacionamento);
+            }
         }
 
         estacionamento.getReservas().add(novaReserva);
         cliente.getReservas().add(novaReserva);
 
         novaReserva.setStatus(true);
-        return ReservaMapper.fromEntity(reservaRepository.save(novaReserva));
+        return ReservaMapper.fromEntity(ReservaDao.save(novaReserva));
     }
 
     @Transactional
     public ReservaResponse atualizarReserva(ReservaRequest dto, Long id) {
-        Optional<Reserva> optionalReserva = reservaRepository.findById(id);
+        Optional<Reserva> optionalReserva = ReservaDao.findById(id);
 
         if (optionalReserva.isEmpty()) {
             throw new IdNaoCadastrado("ID de reserva buscado não encontrado no sistema!");
@@ -120,25 +145,28 @@ public class ReservaService {
         Estacionamento estacionamento = reserva.getEstacionamento();
         if (estacionamento != null && estacionamento.getVagasDisponiveis() != null) {
             if (statusAnterior != StatusReserva.ACEITA && reserva.getStatusReserva() == StatusReserva.ACEITA) {
-                if (estacionamento.getVagasDisponiveis() > 0) {
-                    estacionamento.setVagasDisponiveis(estacionamento.getVagasDisponiveis() - 1);
+                if (estacionamento.getVagasDisponiveis() <= 0) {
+                    throw new ConflitoDeRegraDeNegocioException("Não há vagas disponíveis neste estacionamento para confirmar a reserva.");
                 }
+                estacionamento.setVagasDisponiveis(estacionamento.getVagasDisponiveis() - 1);
+                EstacionamentoDao.save(estacionamento);
             } else if (statusAnterior == StatusReserva.ACEITA
                     && (reserva.getStatusReserva() == StatusReserva.RECUSADA || reserva.getStatusReserva() == StatusReserva.ENCERRADA)) {
                 int max = estacionamento.getMaxVagas() != null ? estacionamento.getMaxVagas() : estacionamento.getVagasDisponiveis() + 1;
                 estacionamento.setVagasDisponiveis(Math.min(max, estacionamento.getVagasDisponiveis() + 1));
+                EstacionamentoDao.save(estacionamento);
                 if (reserva.getStatusReserva() == StatusReserva.RECUSADA) {
                     reserva.setCanceladaEm(Instant.now());
                 }
             }
         }
 
-        return ReservaMapper.fromEntity(reservaRepository.save(reserva));
+        return ReservaMapper.fromEntity(ReservaDao.save(reserva));
     }
 
     @Transactional
     public void deletarReserva(Long id) {
-        Optional<Reserva> optionalReserva = reservaRepository.findById(id);
+        Optional<Reserva> optionalReserva = ReservaDao.findById(id);
 
         if (optionalReserva.isEmpty()) {
             throw new IdNaoCadastrado("ID de reserva buscado não encontrado no sistema!");
@@ -162,6 +190,6 @@ public class ReservaService {
 
         reserva.setCanceladaEm(Instant.now());
         reserva.setStatus(false);
-        reservaRepository.save(reserva);
+        ReservaDao.save(reserva);
     }
 }

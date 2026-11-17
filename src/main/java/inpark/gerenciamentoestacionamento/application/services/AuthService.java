@@ -1,7 +1,7 @@
 package inpark.gerenciamentoestacionamento.application.services;
 
 import inpark.gerenciamentoestacionamento.application.dto.requests.login.UsuarioLoginRequest;
-import inpark.gerenciamentoestacionamento.infraestructure.repositories.usuario.UsuarioRepository;
+import inpark.gerenciamentoestacionamento.dao.UsuarioDao;
 import inpark.gerenciamentoestacionamento.infraestructure.security.JwtService;
 import inpark.gerenciamentoestacionamento.model.entities.usuarios.Usuario;
 import inpark.gerenciamentoestacionamento.model.exceptions.CredenciaisInvalidasException;
@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class AuthService {
 
-    private final UsuarioRepository usuarios;
+    private final UsuarioDao usuarios;
     private final PasswordEncoder encoder;
     private final JwtService jwt;
 

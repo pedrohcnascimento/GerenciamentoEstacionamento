@@ -3,13 +3,13 @@ package inpark.gerenciamentoestacionamento.application.services;
 import inpark.gerenciamentoestacionamento.application.dto.requests.EstacionamentoRequest;
 import inpark.gerenciamentoestacionamento.application.dto.response.EstacionamentoResponse;
 import inpark.gerenciamentoestacionamento.application.mappers.EstacionamentoMapper;
-import inpark.gerenciamentoestacionamento.infraestructure.repositories.EstacionamentoRepository;
-import inpark.gerenciamentoestacionamento.infraestructure.repositories.usuario.DonoRepository;
+import inpark.gerenciamentoestacionamento.dao.EstacionamentoDao;
+import inpark.gerenciamentoestacionamento.dao.DonoDao;
 import inpark.gerenciamentoestacionamento.model.entities.Estacionamento;
 import inpark.gerenciamentoestacionamento.model.entities.usuarios.DonoEstacionamento;
 import inpark.gerenciamentoestacionamento.model.exceptions.IdNaoCadastrado;
-import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -17,23 +17,33 @@ import java.util.List;
 
 @Service
 public class EstacionamentoService {
-    private final EstacionamentoRepository estacionamentoRepository;
-    private final DonoRepository donoRepository;
+    private final EstacionamentoDao EstacionamentoDao;
+    private final DonoDao DonoDao;
 
-    public EstacionamentoService(EstacionamentoRepository estacionamentoRepository, DonoRepository donoRepository) {
-        this.estacionamentoRepository = estacionamentoRepository;
-        this.donoRepository = donoRepository;
+    public EstacionamentoService(EstacionamentoDao EstacionamentoDao, DonoDao DonoDao) {
+        this.EstacionamentoDao = EstacionamentoDao;
+        this.DonoDao = DonoDao;
     }
 
     public List<EstacionamentoResponse> listarTodosOsEstacionamentos() {
-        return estacionamentoRepository.findByStatusTrue()
+        return EstacionamentoDao.findByStatusTrue()
+                .stream()
+                .map(EstacionamentoMapper::fromEntity)
+                .toList();
+    }
+
+    public List<EstacionamentoResponse> listarPorDono(Long donoId) {
+        if (donoId == null || DonoDao.findById(donoId).isEmpty()) {
+            throw new IdNaoCadastrado("O Id do dono fornecido não foi encontrado no sistema!");
+        }
+        return EstacionamentoDao.findByDono_Id(donoId)
                 .stream()
                 .map(EstacionamentoMapper::fromEntity)
                 .toList();
     }
 
     public EstacionamentoResponse buscarPorId(Long id) {
-        Estacionamento estacionamento = estacionamentoRepository.findById(id)
+        Estacionamento estacionamento = EstacionamentoDao.findById(id)
                 .orElseThrow(() -> new IdNaoCadastrado("ID buscado não foi encontrado no sistema!"));
 
         return EstacionamentoMapper.fromEntity(estacionamento);
@@ -44,7 +54,7 @@ public class EstacionamentoService {
         if (id == null) {
             throw new IdNaoCadastrado("O Id do dono fornecido não foi encontrado no sistema!");
         }
-        DonoEstacionamento dono = donoRepository.findById(id)
+        DonoEstacionamento dono = DonoDao.findById(id)
                 .orElseThrow(() -> new IdNaoCadastrado("O Id do dono fornecido não foi encontrado no sistema!"));
 
         Estacionamento novoEst = EstacionamentoMapper.toEntity(dto);
@@ -71,12 +81,12 @@ public class EstacionamentoService {
             novoEst.setVagasDisponiveis(novoEst.calcularCapacidadeOperacional());
         }
 
-        return EstacionamentoMapper.fromEntity(estacionamentoRepository.save(novoEst));
+        return EstacionamentoMapper.fromEntity(EstacionamentoDao.save(novoEst));
     }
 
     @Transactional
     public EstacionamentoResponse atualizarEstacionamento(EstacionamentoRequest dto, Long id) {
-        Estacionamento estacionamento = estacionamentoRepository.findById(id)
+        Estacionamento estacionamento = EstacionamentoDao.findById(id)
                 .orElseThrow(() -> new IdNaoCadastrado("O Id do estacionamento fornecido não foi encontrado no sistema!"));
 
         if (dto.nome() != null) {
@@ -117,12 +127,12 @@ public class EstacionamentoService {
             estacionamento.setNumeroDeEscrituraImovel(dto.numeroDeEscrituraImovel());
         }
 
-        return EstacionamentoMapper.fromEntity(estacionamentoRepository.save(estacionamento));
+        return EstacionamentoMapper.fromEntity(EstacionamentoDao.save(estacionamento));
     }
 
     @Transactional
     public void desativarEstacionamento(Long id) {
-        Estacionamento estacionamento = estacionamentoRepository.findById(id)
+        Estacionamento estacionamento = EstacionamentoDao.findById(id)
                 .orElseThrow(() -> new IdNaoCadastrado("O Id do estacionamento fornecido não foi encontrado no sistema!"));
 
         if (estacionamento.getDono() != null) {
@@ -132,6 +142,6 @@ public class EstacionamentoService {
             estacionamento.getDono().getEstacionamentos().remove(estacionamento);
         }
         estacionamento.setStatus(false);
-        estacionamentoRepository.save(estacionamento);
+        EstacionamentoDao.save(estacionamento);
     }
 }
